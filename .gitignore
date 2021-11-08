@@ -30,3 +30,31 @@
 *.exe
 *.out
 *.app
+
+# CMake
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+# for VS
+out
+.vs
+
+#Directories console_snake
+Trainee/ConsoleSnake/console_snake/console_snake/Debug
+Trainee/ConsoleSnake/console_snake/console_snake/Release
+Trainee/ConsoleSnake/console_snake/console_snake/x64
+Trainee/ConsoleSnake/console_snake/console_snake/.vs
+Trainee/ConsoleSnake/console_snake/Debug
+Trainee/ConsoleSnake/console_snake/Release
+Trainee/ConsoleSnake/console_snake/x64
+Trainee/ConsoleSnake/console_snake/.vs
+Trainee/ConsoleSnake/.vs
