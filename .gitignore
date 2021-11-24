@@ -47,14 +47,3 @@ _deps
 # for VS
 out
 .vs
-
-#Directories console_snake
-Trainee/ConsoleSnake/console_snake/console_snake/Debug
-Trainee/ConsoleSnake/console_snake/console_snake/Release
-Trainee/ConsoleSnake/console_snake/console_snake/x64
-Trainee/ConsoleSnake/console_snake/console_snake/.vs
-Trainee/ConsoleSnake/console_snake/Debug
-Trainee/ConsoleSnake/console_snake/Release
-Trainee/ConsoleSnake/console_snake/x64
-Trainee/ConsoleSnake/console_snake/.vs
-Trainee/ConsoleSnake/.vs
