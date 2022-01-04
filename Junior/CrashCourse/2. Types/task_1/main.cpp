@@ -22,7 +22,15 @@ int main()
     std::size_t size = sizeof(int);
     printf("size: %zu\n", size);
 
-    int my_array[2] = { 0, 1 };
+    //--------------------------
+    unsigned long array[] = { 0, 1, 2, 4, 3 };
+    unsigned long max = 0;
+    for(size_t i = 0; i < 5; i++){
+        if(array[i] > max){
+            max = array[i];
+        }
+    }
+    printf("max: %lu\n", max);
 
     return 0;
 }
