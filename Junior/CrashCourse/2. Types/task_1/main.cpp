@@ -32,5 +32,17 @@ int main()
     }
     printf("max: %lu\n", max);
 
+    max = 0;
+    for (unsigned long i : array) {
+        if (i > max) {
+            max = i;
+        }
+    }
+    printf("max: %lu\n", max);
+
+    int32_t array_2[] = { 10, 20, 30, 40, 50 };
+    int32_t num = sizeof(array_2) / sizeof(int32_t);
+    printf("num: %lu\n", num);
+
     return 0;
 }
