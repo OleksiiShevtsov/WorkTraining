@@ -109,5 +109,35 @@ int main()
     printf("v.d: %d\n", v.d);
     printf("v.i: %d\n", v.i);
 
+    ///////////////////////////////////
+
+    class Year {
+    public:
+        void addYear(){
+            year++;
+        }
+        bool setYear(int newYear) {
+            if (newYear < 2019) { return false; }
+            year = newYear;
+            return true;
+        }
+        int getYear() {
+            return year;
+        }
+    private:
+        int year;
+    };
+
+    Year clock;
+    if (!clock.setYear(2018)) {
+        clock.setYear(2019);
+    }
+    clock.addYear();
+    printf("clock.hour: %d\n", clock.getYear());
+
+    /////////////////////////////////////////
+   
+
+
     return 0;
 }
