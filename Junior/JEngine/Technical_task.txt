@@ -1,0 +1,3 @@
+-Change the position in the application of the application.
+-Processing the position in real time.
+-Storony app should have access to objects

@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstddef>
 #include <iostream>
+#include <cwchar> // for wprintf
 
 int main()
 {
@@ -22,7 +23,8 @@ int main()
     std::size_t size = sizeof(int);
     printf("size: %zu\n", size);
 
-    //--------------------------
+    ////////////////////////////////////
+
     unsigned long array[] = { 0, 1, 2, 4, 3 };
     unsigned long max = 0;
     for(size_t i = 0; i < 5; i++){
@@ -43,6 +45,69 @@ int main()
     int32_t array_2[] = { 10, 20, 30, 40, 50 };
     int32_t num = sizeof(array_2) / sizeof(int32_t);
     printf("num: %lu\n", num);
+
+    ///////////////////////////////////
+
+    char cText[] = "A book a house of gold.";
+    char16_t cText16[] = u"\u4e66\u4e2d\u81ea\u6709\u9ec4\u91d1\u5c4b";
+
+    printf("cText: %s \n", cText);
+    //wprintf("cText16: %s \n", cText16);
+
+    ////////////////////////////////////
+
+    char alphabet[27];
+    for(int i = 0; i < 26; i++){
+        alphabet[i] = i + 97;
+    }
+    alphabet[26] = 0;
+    printf("%s\n", alphabet);
+    for(int i = 0; i < 26; i++){
+        alphabet[i] = i + 65;
+    }
+    printf("%s\n", alphabet);
+
+    ////////////////////////////////////
+
+    enum class Muve{
+        LEFT,
+        RIGHT,
+        FREE
+    };
+
+    Muve race = Muve::LEFT;
+    switch (race) {
+        case Muve::LEFT: printf("left");break;
+        case Muve::RIGHT: printf("right");break;
+        case Muve::FREE: printf("free");break;
+        default: printf("error");
+    }
+
+    ///////////////////////////////////
+
+    struct Coordinate{
+        int32_t x;
+        int32_t y;
+    };
+
+    Coordinate coordinate;
+    coordinate.x = 10;
+    printf("coordinate.x: %d\n", coordinate.x);
+
+    /////////////////////////////////////
+
+    union Variant{
+        char c[10];
+        int i;
+        double d;
+    };
+
+    Variant v;
+    v.i = 10;
+    printf("v.i: %d\n", v.i);
+    v.d = 1.1;
+    printf("v.d: %d\n", v.d);
+    printf("v.i: %d\n", v.i);
 
     return 0;
 }
