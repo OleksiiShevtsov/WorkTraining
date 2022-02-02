@@ -113,31 +113,90 @@ int main()
 
     class Year {
     public:
+        Year(int year){
+            if (!setYear(year)) {
+                m_year = 2019;
+            }
+        }
         void addYear(){
-            year++;
+            m_year++;
         }
         bool setYear(int newYear) {
             if (newYear < 2019) { return false; }
-            year = newYear;
+            m_year = newYear;
             return true;
         }
         int getYear() {
-            return year;
+            return m_year;
         }
     private:
-        int year;
+        int m_year;
     };
 
-    Year clock;
-    if (!clock.setYear(2018)) {
-        clock.setYear(2019);
-    }
-    clock.addYear();
-    printf("clock.hour: %d\n", clock.getYear());
+    Year year{ 2020 };
+    //if (!year.setYear(2018)) {
+    //    year.setYear(2019);
+    //}
+    year.addYear();
+    printf("clock.hour: %d\n", year.getYear());
 
     /////////////////////////////////////////
    
+    int x1 = 0;     //0
+    int x2{};       //0
+    int x3 = {};    //0
+    int x4;         //0 (maybe)
 
+    int y1 = 10;
+    int y2{ 10 };
+    int y3 = { 10 };
+    int y4( 10 );
+
+    ////  POD  /////////////////////////////////////////
+
+    struct PodStruct{
+        uint32_t ui;
+        char c[256];
+        bool b;
+    };
+
+    PodStruct initPod1{};                   // all fields are equal to 0
+    PodStruct initPod2 = {};                // all fields are equal to 0
+    PodStruct initPod3{ 10, "text" };       // b = 0;
+    PodStruct initPod4{ 10, "text", true }; // all fields init
+
+    ////  POD for array  /////////////////////////////////////////
+
+    int array1[]{ 1, 2 };   //size of array 2: 1, 2
+    int array2[ 4 ];        //size of array 4: 0, 0, 0, 0
+    int array3[ 4 ]{ 1, 2 };//size of array 2: 1, 2, 0, 0
+    int array4[ 4 ];        //size of array 4: no init.
+
+    ////  Full-featured classes  ////////////////////////////////////
+
+    struct Taxonomist{
+        Taxonomist(){
+            printf("1 const .(no argument)\n");
+        }
+        Taxonomist(char c){
+            printf("2 const .char: %c\n", c);
+        }
+        Taxonomist(int i){
+            printf("3 const .int: %d\n", i);
+        }
+        Taxonomist(float f){
+            printf("4 const .float: %f\n", f);
+        }
+    };
+
+    Taxonomist taxonomist1;
+    Taxonomist taxonomist2{ 'a' };
+    Taxonomist taxonomist3{ 100 };
+    Taxonomist taxonomist4{ 10.5f };
+    Taxonomist taxonomist5( 'b' );
+    Taxonomist taxonomist6 = { 'c' };
+    Taxonomist taxonomist7{};
+    Taxonomist taxonomist8();
 
     return 0;
 }
