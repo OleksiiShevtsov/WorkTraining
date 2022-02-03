@@ -198,5 +198,12 @@ int main()
     Taxonomist taxonomist7{};
     Taxonomist taxonomist8();
 
+    //////////////////////////////////////////////////////////////////
+
+    float f1{ 1 };
+    float f2{ 2 };
+    int narrowed_result( f1/f2 );
+    //int res{ f1/f2 };
+
     return 0;
 }
