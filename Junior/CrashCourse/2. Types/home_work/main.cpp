@@ -1,23 +1,37 @@
 #include <cstdio>
 
-int absoluteValue(int num) 
+enum class Operation
 {
-    if (num >= 0)
-        return num;
-    
-    return num * -1;
-}
+    ADD,
+    SUBTRACT,
+    MULTYPLAY,
+    DIVIDE
+};
 
-int sum(int num1, int num2)
-{
-    return num1 + num2;
-}
+struct Calculator{
+    Calculator(Operation operation):
+        m_operation{operation}
+    {
+    }
+
+    int calc(int a, int b){
+        switch (m_operation) {
+            case Operation::ADD: return a + b; break;
+            case Operation::SUBTRACT: return a - b; break;
+            case Operation::MULTYPLAY: return a * b; break;
+            case Operation::DIVIDE: return a / b; break;
+        }
+    }
+
+private:
+    Operation m_operation;
+};
 
 int main()
 {
-    printf("num1: %d.\n", absoluteValue(10));
-    printf("num2: %d.\n", absoluteValue(-10));
-    printf("num1 + num2: %d.\n", sum(absoluteValue(-10), 10));
-    
+    Calculator calculator(Operation::MULTYPLAY);
+
+    printf("res: %d\n", calculator.calc(10, 10));
+
     return 0;
 }

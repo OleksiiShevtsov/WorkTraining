@@ -118,6 +118,9 @@ int main()
                 m_year = 2019;
             }
         }
+        ~Year(){
+            printf("clear class of year");
+        }
         void addYear(){
             m_year++;
         }
@@ -203,7 +206,14 @@ int main()
     float f1{ 1 };
     float f2{ 2 };
     int narrowed_result( f1/f2 );
-    //int res{ f1/f2 };
+    //int res{ f1/f2 }; //error
+
+    ////////////////////////////////////////////////////////////////////
+
+    struct Ork{
+        char name[256] = "Murgul";
+        int damage = 100;
+    };
 
     return 0;
 }
