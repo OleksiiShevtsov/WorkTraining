@@ -139,13 +139,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="jengine.cpp" />
     <ClCompile Include="jibject.h" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="type.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="enum.h" />
     <ClInclude Include="jdynamic_object.h" />
-    <ClInclude Include="jengin.h" />
+    <ClInclude Include="jengine.h" />
     <ClInclude Include="jline_object.h" />
     <ClInclude Include="jstatic_object.h" />
   </ItemGroup>

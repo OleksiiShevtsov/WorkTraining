@@ -8,13 +8,13 @@ namespace jengine {
 		JIObgect(common::Coordinate x, common::Coordinate y, common::Coordinate alpha);
 		virtual ~JIObgect() = 0;
 
-		common::Coordinate getX();
-		common::Coordinate getX();
-		common::Angle getAlpha();
+		virtual common::Coordinate getX();
+		virtual common::Coordinate getY();
+		virtual common::Angle getAlpha();
 
-		void setX(common::Coordinate x);
-		void setY(common::Coordinate y);
-		void setAlpha(common::Coordinate alpha);
+		virtual void setX(common::Coordinate x);
+		virtual void setY(common::Coordinate y);
+		virtual void setAlpha(common::Coordinate alpha);
 
 	private:
 		common::Coordinate m_x;

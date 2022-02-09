@@ -4,13 +4,18 @@
 #include <cwchar> // for wprintf
 
 struct JBall{
-    int getX(){return m_x;}
-    int getY(){return m_y;}
-    void setX(int x){m_x = x;}
-    void setY(int y){m_y = y;}
+    JBall():m_r{}{}
+    JBall(int x, int y, int r):
+        m_x{ x }, m_y{ y }, m_r{ r }{}
+    int getX() const { return m_x; }
+    int getY() const { return m_y; }
+    void setX(int x) { m_x = x; }
+    void setY(int y) { m_y = y; }
+    void print(){ printf("x: %d, y: %d\n", m_x, m_y); }
 private:
     int m_x;
     int m_y;
+    const int m_r;
 };
 
 struct N{
@@ -35,7 +40,7 @@ int main()
     *i_ptr = 100;
     printf("*i_ptr: %d, i_ptr: %p;\n", *i_ptr, i_ptr);
 
-    JBall jball;
+    JBall jball{1, 2, 3};
     JBall *jball_ptr{ &jball };
     jball_ptr->setX(10);
     jball_ptr->setY(20);
@@ -79,6 +84,30 @@ int main()
 
     for(Element* curNode = &elem1; curNode; curNode = curNode->next){
         printf("%c", curNode->c);
+    }
+    printf("\n");
+
+    /////  Argument const  ///////////////////////////////////////////////
+
+    auto m_i{ 10 };     //int
+    auto m_l{ 10L };    //long
+    auto m_f{ 10.0f };  //float
+    auto m_d{ 10.0 };   //double
+    auto m_b{ false };  //bool
+    auto m_s{ "str" };  //char[4]
+
+    auto& ref_i{ m_i };             //int&
+    const auto& const_ref_i{ m_i }; //const int&
+    auto p_i{ &m_i };               //int*
+    auto const_p_i{ &m_i };         //const int*
+
+    JBall arr_jball[10];
+
+    int num = 10;
+    for(auto& i : arr_jball){
+        i.setX( num += 10 );
+        i.setY( num += 20 );
+        i.print();
     }
 
     return 0;

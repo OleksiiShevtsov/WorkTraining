@@ -1,13 +1,13 @@
 namespace jengine {
 
-	enum CurrentLinearMotion
+	enum class CurrentLinearMotion
 	{
 		FORWARD,
 		BACK,
 		FREE
 	};
 
-	enum CurrentAngularMotion
+	enum class CurrentAngularMotion
 	{
 		LEFT,
 		RIGHT,
