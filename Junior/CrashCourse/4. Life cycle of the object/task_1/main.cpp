@@ -6,7 +6,11 @@
 
 struct JBall{
     JBall( int x, int y, int r ):
-        m_x{ x }, m_y{ y }, m_r{ r }{ countJball++; }
+        m_x{ x }, m_y{ y }, m_r{ r }{
+        if(m_r < 0){
+            throw std::runtime_error{"Radius can not be less than 0"};
+        }
+        countJball++; }
     ~JBall(){ countJball--; };
     int getX() const { return m_x; }
     int getY() const { return m_y; }
@@ -29,11 +33,43 @@ void localVariableThread (){
     static thread_local int localVariableInThread = 1;
 }
 
+//////////////////////////////////////////////////////////////////////
+
+struct Human{
+    Human( const char* name ):
+        m_name{ name }{ printf( "%s constructed;\n", m_name ); }
+    ~Human(){ printf( "%s destructed;\n", m_name ); }
+private:
+    const char* m_name;
+};
+
+static Human humanStatic{"Static"};
+thread_local Human humanThread{"Thread"};
+
+/////////////////////////////////////////////////////////////////////
+
 int main()
 {
-    int* newIVariable = new int{ 100 };
+    int* newIntVariable = new int{ 100 };
+    int* newArray = new int[2]{ 100, 2000 };
 
-    delete newIVariable;
+    delete newIntVariable;
+    delete[] newArray;
+
+    //  Life cycle of the object  ////////////////////////////////////
+
+    Human humanMain("Main");
+    Human* humanDynamic = new Human("Dynamic");
+    delete humanDynamic;
+
+    //  exception  ///////////////////////////////////////////////////
+
+    try {
+        JBall jBall(10, 10, -10);
+    }  catch (const std::runtime_error& e) {
+        printf("message: %s\n", e.what());
+    }
+
 
     return 0;
 }
