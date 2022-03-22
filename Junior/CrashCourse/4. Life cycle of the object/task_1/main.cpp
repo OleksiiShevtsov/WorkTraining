@@ -4,38 +4,24 @@
 #include <typeinfo>
 #include <cwchar> // for wprintf
 
-struct JBall{
-    JBall( int x, int y, int r ):
-        m_x{ x }, m_y{ y }, m_r{ r }{
-        if(m_r < 0){
-            throw std::runtime_error{"Radius can not be less than 0"};
-        }
-        countJball++; }
-    ~JBall(){ countJball--; };
-    int getX() const { return m_x; }
-    int getY() const { return m_y; }
-    void setX( int x ) { m_x = x; }
-    void setY( int y ) { m_y = y; }
-    void print(){ printf("x: %d, y: %d\n", m_x, m_y); }
-    static void printCountJball(){ printf("countJball: %d\n", countJball); }
-
-    static int countJball;
-private:
-    int m_x;
-    int m_y;
-    const int m_r;
-};
-
-int JBall::countJball{ 0 };
+#include "simple_string_owner.h"
+#include "jball.h"
 
 void localVariableThread (){
     // функция создает в потоке уникальную статическую переменную
     static thread_local int localVariableInThread = 1;
 }
 
-//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
 
 struct Human{
+
+    //using the default copy constructor
+    //Human(const Human& other) = default;
+
+    //copy constructor not allowed
+    //Human(const Human& other) = delete;
+
     Human( const char* name ):
         m_name{ name }{ printf( "%s constructed;\n", m_name ); }
     ~Human(){ printf( "%s destructed;\n", m_name ); }
@@ -68,7 +54,25 @@ int main()
         JBall jBall(10, 10, -10);
     }  catch (const std::runtime_error& e) {
         printf("message: %s\n", e.what());
+    }  catch (...) {
+        printf("error%s\n");
     }
+
+    //  SimpleString  /////////////////////////////////////////////////
+
+    SimpleString str(14);
+    str.appendLine("text1");
+    str.appendLine("text2");
+    str.print();
+
+    //SimpleStringOwner strOwner("text3");
+
+    SimpleString strCopy{ str };
+    strCopy.print();
+
+    SimpleString strAppropriation{ 10 };
+    strAppropriation = strCopy;
+    strAppropriation.print();
 
 
 
