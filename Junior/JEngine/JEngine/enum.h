@@ -1,3 +1,5 @@
+#pragma once 
+
 namespace jengine {
 
 	enum class CurrentLinearMotion

@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="jdynamic_object.cpp" />
     <ClCompile Include="jengine.cpp" />
     <ClCompile Include="jibject.h" />
     <ClCompile Include="main.cpp" />

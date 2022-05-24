@@ -1,4 +1,6 @@
-#include "jibject.h"
+#pragma once
+
+/*#include "jibject.h"
 
 namespace jengine {
 
@@ -14,9 +16,9 @@ namespace jengine {
 		void setSpeed(common::Speed speed);
 		void setAcceleration(common::Acceleration acceleration);
 
-	protected:
+	private:
 		common::Speed m_speed;
 		common::Acceleration m_acceleration;
 		CurrentLinearMotion m_currentLinearMotion;
 	};
-}
+}*/

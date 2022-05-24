@@ -1,4 +1,6 @@
-#include "jibject.h"
+#pragma once
+
+/*#include "jibject.h"
 
 namespace jengine {
 
@@ -12,8 +14,8 @@ namespace jengine {
 
 		void setOmega(common::Coordinate omega);
 
-	protected:
+	private:
 		common::AngularVelocity m_omega;
 		CurrentAngularMotion m_currentAngularMotion;
 	};
-}
+}*/
