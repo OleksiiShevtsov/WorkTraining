@@ -4,8 +4,6 @@ project(home_work)
 set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCE_FILES main.cpp
-                 fibonacci_iterator.h
-                 prime_number.h
 )
 
 add_executable(home_work ${SOURCE_FILES})

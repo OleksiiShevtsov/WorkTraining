@@ -9,6 +9,9 @@ set(SOURCE_FILES main.cpp
                  narrow_caster.h
                  structured_bindings.h
                  conditional_statements.h
+                 cycle.h
+                 fibonacci_iterator.h
+                 instructions_goto.h
 )
 
 add_executable(task_1 ${SOURCE_FILES})

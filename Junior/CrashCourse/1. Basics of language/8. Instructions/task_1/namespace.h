@@ -17,6 +17,10 @@ namespace spaceColor::rgbColor {
     bool isColorRed( const ColorStorage& color ){
         return color.m_color == Color::RED;
     }
+
+    ColorStorage observeShrub( const char* name ){
+        return ColorStorage{ name, Color::BLUE };
+    }
 }
 
 using namespace spaceColor;
@@ -31,4 +35,15 @@ void namespaceCheck(){
     if( rgbColor::isColorRed( myColor ) ){
         printf( "%s %d \n", strRed, SC::RED );
     }
+
+    const char* description;
+
+    switch ( const auto newColor = rgbColor::observeShrub( "MY_BLUE" ); newColor.m_color ) {
+        case SC::RED   : { description = "NEW_RED";   }; break;
+        case SC::GREEN : { description = "NEW_GREEN"; }; break;
+        case SC::BLUE  : { description = "NEW_BLUE";  }; break;
+        default: { description = "ERROR_COLOR"; };
+    }
+
+    printf( "COLOR: %s\n", description );
 }
