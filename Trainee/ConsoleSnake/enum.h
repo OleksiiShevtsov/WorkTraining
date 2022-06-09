@@ -1,7 +1,13 @@
 #pragma once
 
 namespace snakeGame {
+
 	namespace common {
+
+		enum SizeBoard {
+			HEIGHT = 24,
+			WIDTH = 24
+		};
 
 		enum Direction {
 			LEFT,

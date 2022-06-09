@@ -4,7 +4,6 @@
 #include <memory>
 #include <thread>
 #include <string>
-#include <mutex>
 #include <chrono>
 #include <conio.h>
 
@@ -19,32 +18,20 @@ namespace snakeGame {
 	public:
 
 		Board() = delete;
-		Board(const Board&) = delete;
-		Board(const Board&&) = delete;
+		Board( const Board& ) = delete;
+		Board( const Board&& ) = delete;
 
-		Board(common::Coordinate sizeX, common::Coordinate sizeY, common::Speed speed);
+		Board( common::Coordinate sizeX, common::Coordinate sizeY );
 
-		std::shared_ptr<Snake> getSnake();
-		bool getGameOverState();
+		void boardState();
 
-		void join();
+		common::Coordinate getSizeX() const;
+		common::Coordinate getSizeY() const;
 
 	private:
 
-		void direction();
-		void boardState();
-		void draw();
-
 		std::string m_screenBuffer;
-		common::Speed m_speed;
-		common::Score m_score;
 		common::Coordinate m_sizeX;
 		common::Coordinate m_sizeY;
-		std::shared_ptr<Snake> m_snake;
-		std::unique_ptr<Fruit> m_fruit;
-		std::unique_ptr<std::thread> m_inputSignals;
-		std::unique_ptr<std::thread> m_renderingBoard;
-		std::mutex mtx;
-		bool gameOverState;
 	};
 }

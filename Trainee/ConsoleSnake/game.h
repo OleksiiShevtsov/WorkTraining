@@ -11,11 +11,20 @@ namespace snakeGame {
 		Game(common::Speed speed);
 
 		void start();
+		void direction();
+		void draw();
+		void join();
 
-		std::shared_ptr<Board> getBoard();
+		bool getGameOverState();
 
 	private:
 		common::Speed m_speed;
-		std::shared_ptr<Board> m_board;
+		common::Score m_score;
+		Snake m_snake;
+		Fruit m_fruit;
+		Board m_board;
+		std::unique_ptr<std::thread> m_inputSignals;
+		std::unique_ptr<std::thread> m_renderingBoard;
+		bool m_gameOverState;
 	};
 }
