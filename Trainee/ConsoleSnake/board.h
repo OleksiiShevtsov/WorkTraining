@@ -22,11 +22,11 @@ namespace snakeGame {
 
 		common::Coordinate getSizeX() const;
 		common::Coordinate getSizeY() const;
-		std::string getScreenBuffer() const;
+		char* getScreenBuffer() const;
 
 		void addToBuffer( const char* partOfBuffer );
 		void addToBuffer( const char partOfBuffer );
-		void buffer—learing();
+		void bufferClearing();
 		
 	private:
 

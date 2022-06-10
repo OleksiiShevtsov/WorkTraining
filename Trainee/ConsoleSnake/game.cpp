@@ -109,7 +109,7 @@ void snakeGame::Game::draw() {
 		//std::cout << m_board.getScreenBuffer() << std::endl;
 		//std::cout << "Score: " << m_score << std::endl;
 
-		m_board.bufferÑlearing();
+		m_board.bufferClearing();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds{ m_speed });
 
@@ -138,11 +138,11 @@ void snakeGame::Game::boardState() {
 		m_gameOverState = true;
 	}
 
-	for (int i = 1; i < m_snake.getTail().size(); ++i) {
-		if ( m_snake.getTail()[ 0 ].x == m_snake.getTail()[ i ].x && m_snake.getTail()[ 0 ].y == m_snake.getTail()[ i ].y ) {
-			m_gameOverState = true;
-		}
-	}
+	//for ( int i = 1; i < m_snake.getTail().size(); ++i ) {
+	//	if ( m_snake.getTail()[ 0 ].x == m_snake.getTail()[ i ].x && m_snake.getTail()[ 0 ].y == m_snake.getTail()[ i ].y ) {
+	//		m_gameOverState = true;
+	//	}
+	//}
 }
 
 void snakeGame::Game::join() {
