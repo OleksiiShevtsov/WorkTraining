@@ -36,10 +36,10 @@ void snakeGame::Menu::colorSelection() {
 	std::cin >> color;
 	switch (color)
 	{
-	case 1: SetConsoleTextAttribute(m_consoleColour, common::BLUE); return;
-	case 2: SetConsoleTextAttribute(m_consoleColour, common::RED); return;
-	case 3: SetConsoleTextAttribute(m_consoleColour, common::YELLOW); return;
-	default: return;
+		case 1: SetConsoleTextAttribute(m_consoleColour, common::BLUE); return;
+		case 2: SetConsoleTextAttribute(m_consoleColour, common::RED); return;
+		case 3: SetConsoleTextAttribute(m_consoleColour, common::YELLOW); return;
+		default: return;
 	}
 }
 

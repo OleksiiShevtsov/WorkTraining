@@ -12,8 +12,8 @@ snakeGame::Game::Game(common::Speed speed) :
 
 void snakeGame::Game::start() {
 
-	m_inputSignals = std::make_unique<std::thread>(&direction, this);
-	m_renderingBoard = std::make_unique<std::thread>(&draw, this);
+	m_inputSignals = std::make_unique< std::thread >( &Game::direction, this );
+	m_renderingBoard = std::make_unique< std::thread >( &Game::draw, this );
 
 	join();
 }
@@ -56,61 +56,92 @@ void snakeGame::Game::draw() {
 
 	while (!m_gameOverState) {
 
-		for (int x = 0; x < m_sizeX; ++x) {
-			m_screenBuffer += (char)219;
-			m_screenBuffer += (char)219;
+		for ( int x = 0; x < m_board.getSizeX(); ++x ) {
+			m_board.addToBuffer( (char)219 );
+			m_board.addToBuffer( (char)219 );
 		}
 
-		m_screenBuffer += '\n';
+		m_board.addToBuffer( '\n' );
 
-		for (int y = 1; y < m_sizeY - 1; ++y) {
-			for (int x = 0; x < m_sizeX; ++x) {
-				if (x == 0 || x == m_sizeX - 1) {
-					m_screenBuffer += (char)219;
-					m_screenBuffer += (char)219;
+		for ( int y = 1; y < m_board.getSizeY() - 1; ++y ) {
+			for ( int x = 0; x < m_board.getSizeX(); ++x ) {
+				if ( x == 0 || x == m_board.getSizeX() - 1 ) {
+					m_board.addToBuffer( (char)219 );
+					m_board.addToBuffer( (char)219 );
 				}
-				else if (m_snake->getCoordinateHeadX() == x && m_snake->getCoordinateHeadY() == y) {
-					m_screenBuffer += (char)219;
-					m_screenBuffer += (char)219;
+				else if ( m_snake.getCoordinateHeadX() == x && m_snake.getCoordinateHeadY() == y ) {
+					m_board.addToBuffer( (char)219 );
+					m_board.addToBuffer( (char)219 );
 				}
-				else if (m_fruit->getX() == x && m_fruit->getY() == y) {
-					m_screenBuffer += "[]";
+				else if (m_fruit.getX() == x && m_fruit.getY() == y) {
+					m_board.addToBuffer( '[' );
+					m_board.addToBuffer( ']' );
 				}
 				else {
 
 					int flag = true;
-					for (int i = 1; i < m_snake->getTail()->size(); ++i) {
-						if ((m_snake->getTail()->size() > 1) && (*m_snake->getTail())[i].x == x && (*m_snake->getTail())[i].y == y) {
-							m_screenBuffer += (char)219;
-							m_screenBuffer += (char)219;
+					for (int i = 1; i < m_snake.getTail().size(); ++i) {
+						if ( m_snake.getTail().size() > 1 && m_snake.getTail()[ i ].x == x && m_snake.getTail()[ i ].y == y ) {
+							m_board.addToBuffer( (char)219 );
+							m_board.addToBuffer( (char)219 );
 							flag = false;
 							break;
 						}
 					}
 					if (flag) {
-						m_screenBuffer += "  ";
+						m_board.addToBuffer( ' ' );
+						m_board.addToBuffer( ' ' );
 					}
 				}
 			}
 
-			m_screenBuffer += '\n';
+			m_board.addToBuffer( '\n' );
 		}
 
-		for (int x = 0; x < m_sizeX; ++x) {
-			m_screenBuffer += (char)219;
-			m_screenBuffer += (char)219;
+		for (int x = 0; x < m_board.getSizeX(); ++x) {
+			m_board.addToBuffer( (char)219 );
+			m_board.addToBuffer( (char)219 );
 		}
 
-		system("cls");
+		system( "cls" );
 
-		std::cout << m_screenBuffer << std::endl;
-		std::cout << "Score: " << m_score << std::endl;
+		printf( "%s", m_board.getScreenBuffer() );
+		//std::cout << m_board.getScreenBuffer() << std::endl;
+		//std::cout << "Score: " << m_score << std::endl;
 
-		m_screenBuffer = "";
+		m_board.bufferÑlearing();
 
 		std::this_thread::sleep_for(std::chrono::milliseconds{ m_speed });
 
-		m_board.boardState();
+		boardState();
+	}
+}
+
+void snakeGame::Game::boardState() {
+
+	if ( m_snake.getCoordinateHeadX() == m_fruit.getX() && m_snake.getCoordinateHeadY() == m_fruit.getY() ) {
+		m_snake.incrementSnake( m_fruit.getX(), m_fruit.getY() );
+		m_fruit.updateFruitCoordinate();
+
+		switch ( m_speed )
+		{
+			case common::Speed::HIGH: m_score += 300; break;
+			case common::Speed::MIDDLE: m_score += 200; break;
+			case common::Speed::LOW: m_score += 100; break;
+		}
+	}
+
+	m_snake.move();
+
+	if ( m_snake.getCoordinateHeadX() <= 0 || m_snake.getCoordinateHeadX() >= m_board.getSizeX() - 1 ||
+		m_snake.getCoordinateHeadY() <= 0 || m_snake.getCoordinateHeadY() >= m_board.getSizeY() - 1 ) {
+		m_gameOverState = true;
+	}
+
+	for (int i = 1; i < m_snake.getTail().size(); ++i) {
+		if ( m_snake.getTail()[ 0 ].x == m_snake.getTail()[ i ].x && m_snake.getTail()[ 0 ].y == m_snake.getTail()[ i ].y ) {
+			m_gameOverState = true;
+		}
 	}
 }
 

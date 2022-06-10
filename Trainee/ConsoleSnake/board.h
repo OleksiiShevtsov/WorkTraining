@@ -2,16 +2,13 @@
 
 #include <iostream>
 #include <memory>
-#include <thread>
 #include <string>
-#include <chrono>
 #include <conio.h>
 
 #include <windows.h>
 
 #include "enum.h"
-#include "snake.h"
-#include "fruit.h"
+#include "type.h"
 
 namespace snakeGame {
 	class Board {
@@ -23,14 +20,24 @@ namespace snakeGame {
 
 		Board( common::Coordinate sizeX, common::Coordinate sizeY );
 
-		void boardState();
-
 		common::Coordinate getSizeX() const;
 		common::Coordinate getSizeY() const;
+		std::string getScreenBuffer() const;
 
+		void addToBuffer( const char* partOfBuffer );
+		void addToBuffer( const char partOfBuffer );
+		void buffer—learing();
+		
 	private:
 
-		std::string m_screenBuffer;
+		struct ScreenBuffer
+		{
+			char* m_buffer;
+			int m_currentPosition;
+		};
+
+		ScreenBuffer m_screenBuffer;
+
 		common::Coordinate m_sizeX;
 		common::Coordinate m_sizeY;
 	};

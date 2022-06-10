@@ -1,8 +1,11 @@
 #pragma once
 
 #include <stdlib.h>
+#include <thread>
 
 #include "board.h"
+#include "snake.h"
+#include "fruit.h"
 
 namespace snakeGame {
 	class Game{ 
@@ -18,6 +21,9 @@ namespace snakeGame {
 		bool getGameOverState();
 
 	private:
+
+		void boardState();
+
 		common::Speed m_speed;
 		common::Score m_score;
 		Snake m_snake;
