@@ -19,12 +19,18 @@
 }*/
 
 // variable template
-template < typename T >
+/*template < typename T >
 constexpr T sum( T x ){ return x; }
 
-template < typename T, typename ... Args >
-constexpr T sum( T x, Args ... args ){
+template < typename T, typename... Args >
+constexpr T sum( T x, Args... args ){
     return x + sum( args ... );
+}*/
+
+//expression of package
+template < typename... T >
+constexpr auto sum( T... args ){
+    return ( ... + args );
 }
 
 void variableFunctionsCheck(){

@@ -5,6 +5,9 @@
 
 #include "decltype.h"
 #include "variable_functions.h"
+#include "pointer_to_function.h"
+#include "function_call_operator.h"
+#include "lambda_expression.h"
 
 // The function is compiled in a series of instructions
 // 1. Move arguments to registers and calls stack
@@ -26,7 +29,10 @@
 int main()
 {
     //decltypeCheck();
-    variableFunctionsCheck();
+    //variableFunctionsCheck();
+    //pointerToFunctionCheck();
+    //functionCallOperatorCheck();
+    lambdaExpressionCheck();
 
     return 0;
 }
