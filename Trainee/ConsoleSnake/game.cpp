@@ -6,20 +6,22 @@ snakeGame::Game::Game(common::Speed speed) :
 	m_snake{ common::SizeBoard::WIDTH / 2, common::SizeBoard::HEIGHT / 2 },
 	m_fruit{ common::SizeBoard::WIDTH, common::SizeBoard::HEIGHT },
 	m_board{ common::SizeBoard::WIDTH, common::SizeBoard::HEIGHT },
-	m_gameOverState{ false }
+	m_gameOverState{ false },
+	m_closingIncomDirection{ false }
 {
 }
 
 void snakeGame::Game::start() {
 
-	m_inputSignals = std::make_unique< std::thread >( &Game::direction, this );
-	m_renderingBoard = std::make_unique< std::thread >( &Game::draw, this );
+	m_renderingBoard = std::make_unique< std::thread >(&Game::draw, this);
+	direction();
+	//m_inputSignals = std::make_unique< std::thread >( &Game::direction, this );
 
 	join();
 }
 
 void snakeGame::Game::direction() {
-	while (!m_gameOverState) {
+	while ( true ) {
 
 		if (_kbhit()) {
 			switch (_getch()) {
@@ -53,8 +55,7 @@ void snakeGame::Game::direction() {
 }
 
 void snakeGame::Game::draw() {
-
-	while (!m_gameOverState) {
+	while ( !m_gameOverState ) {
 
 		for ( int x = 0; x < m_board.getSizeX(); ++x ) {
 			m_board.addToBuffer( (char)219 );
@@ -115,6 +116,8 @@ void snakeGame::Game::draw() {
 
 		boardState();
 	}
+
+	m_closingIncomDirection = true;
 }
 
 void snakeGame::Game::boardState() {
@@ -136,16 +139,17 @@ void snakeGame::Game::boardState() {
 	if ( m_snake.getCoordinateHeadX() <= 0 || m_snake.getCoordinateHeadX() >= m_board.getSizeX() - 1 ||
 		m_snake.getCoordinateHeadY() <= 0 || m_snake.getCoordinateHeadY() >= m_board.getSizeY() - 1 ) {
 		m_gameOverState = true;
+		return;
 	}
 
-	//for ( int i = 1; i < m_snake.getTail().size(); ++i ) {
-	//	if ( m_snake.getTail()[ 0 ].x == m_snake.getTail()[ i ].x && m_snake.getTail()[ 0 ].y == m_snake.getTail()[ i ].y ) {
-	//		m_gameOverState = true;
-	//	}
-	//}
+	for ( int i = 1; i < m_snake.getTail().size(); ++i ) {
+		if ( m_snake.getTail()[ 0 ].x == m_snake.getTail()[ i ].x && m_snake.getTail()[ 0 ].y == m_snake.getTail()[ i ].y ) {
+			m_gameOverState = true;
+			return;
+		}
+	}
 }
 
 void snakeGame::Game::join() {
-	m_inputSignals->join();
 	m_renderingBoard->join();
 }

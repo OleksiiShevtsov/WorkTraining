@@ -14,14 +14,12 @@ namespace snakeGame {
 		Game(common::Speed speed);
 
 		void start();
-		void direction();
-		void draw();
-		void join();
-
-		bool getGameOverState();
 
 	private:
 
+		void direction();
+		void draw();
+		void join();
 		void boardState();
 
 		common::Speed m_speed;
@@ -32,5 +30,6 @@ namespace snakeGame {
 		std::unique_ptr<std::thread> m_inputSignals;
 		std::unique_ptr<std::thread> m_renderingBoard;
 		bool m_gameOverState;
+		bool m_closingIncomDirection;
 	};
 }
