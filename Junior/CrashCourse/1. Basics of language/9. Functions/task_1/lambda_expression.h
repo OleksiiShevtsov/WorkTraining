@@ -14,6 +14,28 @@ void transform( Fn fn, const int* in, int* out, size_t length ){
     printf( "\n" );
 }
 
+struct LambdaFactory {
+    LambdaFactory( char in ) : 
+        m_toCount{ in }, m_tally{}{}
+    auto makeLamda() {
+        // [ = ] - passing by value, 
+        // [ & ] - passing by reference
+        // [ mutable ] allows to change the 
+        // variable captured by value
+        return [ this ]( const char* str ) {
+            size_t index{}, result{};
+            while (str[index]) {
+                if ( str[index] == m_toCount) { result++; }
+                index++;
+            }
+            m_tally = m_tally + result;
+            return result;
+        };
+    }
+    const char m_toCount;
+    rsize_t m_tally;
+};
+
 void lambdaExpressionCheck(){
 
     /*const size_t len{ 3 };
@@ -25,25 +47,14 @@ void lambdaExpressionCheck(){
     transform( []( int x ) { return x; }, base, b, len );
     transform( funcTrans, base, c, len );*/
 
-    char toCount{ 't' };
-    size_t tally{};
-    // [ = ] - passing by value, [ & ] - passing by reference
-    // [ mutable ] allows to change the variable captured by value
-    auto sCountr = [ = ]( const char* str ) mutable {
-        size_t index{}, result{};
-        while ( str[ index ] ){
-            if( str[ index ] == toCount ){ result++; }
-             index++;
-        }
-        tally = tally + result;
-        return result;
-    };
+    LambdaFactory factory{ 't' };
+    auto lamda = factory.makeLamda();
 
-    printf( "Tally: %zu\n", tally );
-    auto text1 = sCountr( "text1" );
-    printf( "text1: %zu\n", text1 );
-    printf( "Tally: %zu\n", tally );
-    auto text2 = sCountr( "text2" );
-    printf( "text2: %zu\n", text2 );
-    printf( "Tally: %zu\n", tally );
+    printf( "Tally1: %zu\n", factory.m_tally);
+    printf( "Sally1: %zu\n", lamda("text1"));
+
+    printf( "Tally2: %zu\n", factory.m_tally);
+    printf("Sally2: %zu\n", lamda("text2"));
+
+    printf("Tally: %zu\n", factory.m_tally);
 }
