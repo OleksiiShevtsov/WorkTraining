@@ -1,3 +1,5 @@
+#pragma once
+
 #include <cstdio>
 
 template < typename X, typename Y >

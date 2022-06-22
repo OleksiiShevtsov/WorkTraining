@@ -8,6 +8,8 @@
 #include "pointer_to_function.h"
 #include "function_call_operator.h"
 #include "lambda_expression.h"
+#include "std_function.h"
+#include "alpha_histogram.h"
 
 // The function is compiled in a series of instructions
 // 1. Move arguments to registers and calls stack
@@ -26,13 +28,22 @@
 // override     - the function must override the virtual function
 // virtual      - function can be overridden in child class ( the most child class is called )
 
-int main()
+//decltypeCheck();
+//variableFunctionsCheck();
+//pointerToFunctionCheck();
+//functionCallOperatorCheck();
+//lambdaExpressionCheck();
+//stdFunctionCheck();
+
+// program parameters
+int main( int argc, char** argv )
 {
-    //decltypeCheck();
-    //variableFunctionsCheck();
-    //pointerToFunctionCheck();
-    //functionCallOperatorCheck();
-    lambdaExpressionCheck();
+    AlphaHistogram hist;
+
+    for( size_t i {}; i < argc; i++ ){
+        hist.insert( argv[ i ] );
+    }
+    hist.print();
 
     return 0;
 }

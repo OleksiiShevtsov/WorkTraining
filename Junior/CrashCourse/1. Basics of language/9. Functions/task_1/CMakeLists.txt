@@ -9,6 +9,8 @@ set(SOURCE_FILES main.cpp
                  pointer_to_function.h
                  function_call_operator.h
                  lambda_expression.h
+                 std_function.h
+                 alpha_histogram.h
 )
 
 add_executable(task_1 ${SOURCE_FILES})
