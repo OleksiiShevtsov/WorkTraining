@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.16.3)
-project(task_1)
+project(lesson)
 
 set(CMAKE_CXX_STANDARD 14)
 
 set(SOURCE_FILES main.cpp)
 
-add_executable(task_1 ${SOURCE_FILES})
+add_executable(lesson ${SOURCE_FILES})
 

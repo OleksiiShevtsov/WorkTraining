@@ -14,12 +14,12 @@ namespace snakeGame {
 		Game(common::Speed speed);
 
 		void start();
+		void join();
 
 	private:
 
 		void direction();
 		void draw();
-		void join();
 		void boardState();
 
 		common::Speed m_speed;

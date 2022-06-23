@@ -15,9 +15,12 @@ void snakeGame::Menu::start() {
 		std::cout << "Memu:" << std::endl;
 		colorSelection();
 		speedSelection();
+
 		m_game = std::make_unique<Game>(m_speed);
 		m_game->start();
+		m_game->join();
 		m_game.reset();
+
 		extend();
 	}
 }

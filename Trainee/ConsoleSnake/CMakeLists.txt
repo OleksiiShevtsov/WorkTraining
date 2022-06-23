@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16.3)
-project(task_1)
+project(console_snake)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -18,4 +18,4 @@ set(SOURCE_FILES main.cpp
 				 board.cpp
 )
 
-add_executable(task_1 ${SOURCE_FILES})
+add_executable(console_snake ${SOURCE_FILES})

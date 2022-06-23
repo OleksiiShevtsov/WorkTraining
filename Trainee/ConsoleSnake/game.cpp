@@ -13,15 +13,12 @@ snakeGame::Game::Game(common::Speed speed) :
 
 void snakeGame::Game::start() {
 
-	m_renderingBoard = std::make_unique< std::thread >(&Game::draw, this);
-	direction();
-	//m_inputSignals = std::make_unique< std::thread >( &Game::direction, this );
-
-	join();
+	m_renderingBoard = std::make_unique< std::thread >( &Game::draw, this );
+    m_inputSignals = std::make_unique< std::thread >( &Game::direction, this );
 }
 
 void snakeGame::Game::direction() {
-	while ( true ) {
+	while ( !m_gameOverState ) {
 
 		if (_kbhit()) {
 			switch (_getch()) {
@@ -106,9 +103,8 @@ void snakeGame::Game::draw() {
 
 		system( "cls" );
 
-		printf( "%s", m_board.getScreenBuffer() );
-		//std::cout << m_board.getScreenBuffer() << std::endl;
-		//std::cout << "Score: " << m_score << std::endl;
+		std::cout << m_board.getScreenBuffer() << std::endl;
+		std::cout << "Score: " << m_score << std::endl;
 
 		m_board.bufferClearing();
 
@@ -116,8 +112,6 @@ void snakeGame::Game::draw() {
 
 		boardState();
 	}
-
-	m_closingIncomDirection = true;
 }
 
 void snakeGame::Game::boardState() {
@@ -152,4 +146,5 @@ void snakeGame::Game::boardState() {
 
 void snakeGame::Game::join() {
 	m_renderingBoard->join();
+	m_inputSignals->join();
 }

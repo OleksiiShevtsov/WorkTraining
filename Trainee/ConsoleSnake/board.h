@@ -19,26 +19,17 @@ namespace snakeGame {
 		Board( const Board&& ) = delete;
 
 		Board( common::Coordinate sizeX, common::Coordinate sizeY );
-		~Board() {
-			delete[] m_screenBuffer.m_buffer;
-		}
 
 		common::Coordinate getSizeX() const;
 		common::Coordinate getSizeY() const;
-		char* getScreenBuffer() const;
+		std::string getScreenBuffer() const;
 
 		void addToBuffer( const char partOfBuffer );
 		void bufferClearing();
 		
 	private:
 
-		struct ScreenBuffer
-		{
-			char* m_buffer;
-			int m_currentPosition;
-		};
-
-		ScreenBuffer m_screenBuffer;
+		std::string m_screenBuffer;
 
 		common::Coordinate m_sizeX;
 		common::Coordinate m_sizeY;
