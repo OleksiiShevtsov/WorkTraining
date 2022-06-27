@@ -3,7 +3,7 @@
 #include <typeinfo>
 #include <stdexcept>
 
-#include "auto_brake.h"
+#include "test_auto_brake.h"
 
 // Unit tests
 // iterative testing
@@ -12,7 +12,7 @@
 
 int main()
 {
-
+    startAllTestsForAutoBrake();
 
     return 0;
 }

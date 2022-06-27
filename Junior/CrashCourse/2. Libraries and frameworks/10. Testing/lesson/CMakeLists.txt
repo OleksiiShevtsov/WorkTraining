@@ -3,8 +3,6 @@ project(lesson)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(SOURCE_FILES main.cpp
-                 auto_brake.h
-)
+set(SOURCE_FILES main.cpp)
 
 add_executable(lesson ${SOURCE_FILES})
