@@ -19,3 +19,5 @@ FetchContent_MakeAvailable(googletest)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC gtest)
 target_link_libraries(${PROJECT_NAME} PUBLIC gtest_main)
+
+add_subdirectory(Boost)
