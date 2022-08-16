@@ -2,7 +2,6 @@
 
 #include <gtest/gtest.h>
 
-#include "user_test/user_test_env.h"
 #include "auto_brake/auto_brake.h"
 
 struct AutoBrakeTest : ::testing::Test{

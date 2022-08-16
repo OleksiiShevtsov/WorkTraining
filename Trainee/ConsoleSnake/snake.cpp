@@ -1,7 +1,6 @@
 #include "snake.h"
 
-snakeGame::Snake::Snake( common::Coordinate x, common::Coordinate y ) :
-	m_tail{ std::vector< Item >() }
+snakeGame::Snake::Snake( common::Coordinate x, common::Coordinate y )
 {
 	m_tail.push_back( Item{ x, y } );
 }
