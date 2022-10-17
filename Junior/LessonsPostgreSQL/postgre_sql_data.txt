@@ -1,0 +1,36 @@
+password: password
+port: 5432
+
+https://www.mockaroo.com
+
+*** commands in SQL Shell ***
+	* \l # all bases
+	* \c name_data_base # join base
+	* \d # list table
+	* \d table_name # list column
+	* \dt # number of records
+	* \i local_path_to_.sql
+	* \conninfo
+	* CREATE DATABASE name_data_base;
+	* CREATE TABLE table_name( column_name + data_type + constraints ( if any ) )
+	* DROP DATABASE name_data_base; # !!!
+	* DROP TABLE table_name;# !!!
+	* SELECT param FROM table_name; # get data from table
+		param: * # all data
+		param: empty # number of lines
+ 		param: column_1, column_2 ... 
+		sort_param: ASC, DESC
+		DISTINCT # выбрать данные с отличием
+		ORDER BY column sort_param # сортировка по...
+		WHERE param_if; 
+			AND, 
+			OR # for additional condition, 
+			IN ( 'value_1', 'value_2', ... )
+			BETWEEN 'value_1' AND 'value_2'; 
+			LIKE value; # Example 'n%' , (iLIKE)
+		OFFSET n LIMIT m # (LIMMIT m == FETCH FIRST m ROW ONLY)
+		GROUP BY value
+		COUNT(value)
+			HANING value if
+		column AS column_name # new column name
+		COALESCE(column, 'message') # подменяет пустые значение 'message'
