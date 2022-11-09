@@ -93,3 +93,7 @@ compile_commands.json
 
 # third party libraries
 *glfw*
+*glad*
+*spdlog*
+*imgui*
+*glm*
