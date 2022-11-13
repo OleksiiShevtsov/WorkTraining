@@ -2,11 +2,14 @@
 
 #include <boost/smart_ptr/scoped_ptr.hpp>
 
-struct DeadMenOfDunharrow {
-	DeadMenOfDunharrow( const char* m = "" ) : message{ m } {
+struct DeadMenOfDunharrow
+{
+    DeadMenOfDunharrow( const char* m = "" ) : message{ m }
+    {
 		oathsToFulfill++;
 	}
-	~DeadMenOfDunharrow() {
+    ~DeadMenOfDunharrow()
+    {
 		oathsToFulfill--;
 	}
 	const char* message;

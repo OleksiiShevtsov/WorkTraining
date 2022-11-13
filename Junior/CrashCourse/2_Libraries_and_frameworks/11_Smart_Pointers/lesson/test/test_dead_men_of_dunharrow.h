@@ -8,18 +8,39 @@
 
 #include "../dead_men_of_dunharrow.h"
 
-TEST_CASE( "ScopedPtr evaluates to" ) {
-    SECTION( "true when full" ) {
+TEST_CASE( "scoped_ptr evaluates to" )
+{
+    SECTION( "true when full" )
+    {
         ScopedOathbreakers aragorn{ new DeadMenOfDunharrow{} };
         REQUIRE(aragorn);
     }
-    SECTION("false when empty") {
+    SECTION( "false when empty" )
+    {
         ScopedOathbreakers aragorn;
         REQUIRE_FALSE( aragorn );
     }
 }
 
-TEST_CASE( "ScopedPtr is an RAII wrapper" ) {
+TEST_CASE( "unique_ptr evaluates to" )
+{
+    auto aragorn = std::make_unique<DeadMenOfDunharrow>();
+    SECTION( "true when full" )
+    {
+        auto sonOfArartorn{ std::move( aragorn ) };
+        REQUIRE(DeadMenOfDunharrow::oathsToFulfill == 1);
+    }
+    SECTION( "false when empty" )
+    {
+        auto sonOfArartorn = std::make_unique< DeadMenOfDunharrow >();
+        REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 2 );
+        sonOfArartorn = std::move( aragorn );
+        REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 1 );
+    }
+}
+
+TEST_CASE( "scoped_ptr is an RAII wrapper" )
+{
     REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 0 );
     ScopedOathbreakers aragorn{ new DeadMenOfDunharrow{} };
     REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 1 );
@@ -30,32 +51,40 @@ TEST_CASE( "ScopedPtr is an RAII wrapper" ) {
     REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 1 );
 }
 
-TEST_CASE( "ScopedPtr supports pointer semantics" ) {
+TEST_CASE( "scoped_ptr supports pointer semantics" )
+{
     auto message = "The way is shut";
     ScopedOathbreakers aragorn{ new DeadMenOfDunharrow{ message } };
-    SECTION("operator*") {
+    SECTION("operator*")
+    {
         REQUIRE( (*aragorn).message == message );
     }
-    SECTION("operator->") {
+    SECTION("operator->")
+    {
         REQUIRE( aragorn->message == message );
     }
-    SECTION("get(), which returns a raw pointer") {
+    SECTION("get(), which returns a raw pointer")
+    {
         REQUIRE( aragorn.get() != nullptr );
     }
 }
 
-TEST_CASE( "ScopedPtr supports comparison with nullptr" ) {
-    SECTION( "operator==" ) {
+TEST_CASE( "scoped_ptr supports comparison with nullptr" )
+{
+    SECTION( "operator==" )
+    {
         ScopedOathbreakers legolas{};
         REQUIRE( legolas == nullptr );
     }
-    SECTION( "operator!=" ) {
+    SECTION( "operator!=" )
+    {
         ScopedOathbreakers aragorn{ new DeadMenOfDunharrow{} };
         REQUIRE( aragorn != nullptr );
     }
 }
 
-TEST_CASE( "ScopedPtr supports swap" ) {
+TEST_CASE( "scoped_ptr supports swap" )
+{
     auto message1 = "The way is shut.";
     auto message2 = "Until the time comes.";
     ScopedOathbreakers aragorn{ new DeadMenOfDunharrow{ message1 } };
@@ -65,13 +94,16 @@ TEST_CASE( "ScopedPtr supports swap" ) {
     REQUIRE( legolas->message == message1 );
 }
 
-TEST_CASE( "ScopedPtr reset" ) {
+TEST_CASE( "scoped_ptr reset" )
+{
     ScopedOathbreakers aragorn{ new DeadMenOfDunharrow{} };
-    SECTION( "destructs owned object" ) {
+    SECTION( "destructs owned object" )
+    {
         aragorn.reset();
         REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 0 );
     }
-    SECTION( "destructs owned object" ) {
+    SECTION( "destructs owned object" )
+    {
         auto message = "It was made by those who are Dead.";
         auto newDeadMen = new DeadMenOfDunharrow{ message };
         REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 2 );
@@ -85,25 +117,39 @@ TEST_CASE( "ScopedPtr reset" ) {
 void byRef( const ScopedOathbreakers& ){}
 void byVal( ScopedOathbreakers ){}
 
-TEST_CASE( "ScopedPtr can" ) {
+TEST_CASE( "scoped_ptr can" )
+{
     ScopedOathbreakers aragorn{ new DeadMenOfDunharrow{} };
-    SECTION( "be passed by reference" ) {
+    SECTION( "be passed by reference" )
+    {
         byRef( aragorn );
     }
-    /*SECTION( "not by copied" ) {
+    /*SECTION( "not by copied" )
+    {
         // not compile
         byVal( aragorn );
         auto sonOfArathorn = aragorn;
     }
-    SECTION( "not by moved" ) {
+    SECTION( "not by moved" )
+    {
         // not compile
         byVal( std::move( aragorn ) );
         auto sonOfArathorn = std::move( aragorn );
     }*/
 }
 
-TEST_CASE( "ScopedArray supports operator[]" ) {
-    boost::scoped_array<int> squares{ new int [ 5 ] { 0, 4, 9, 16, 25 } };
+TEST_CASE( "scoped_array supports operator[]" )
+{
+    boost::scoped_array< int > squares{ new int [ 5 ] { 0, 4, 9, 16, 25 } };
+    squares[ 0 ] = 1;
+    REQUIRE( squares[ 0 ] == 1 );
+    REQUIRE( squares[ 1 ] == 4 );
+    REQUIRE( squares[ 2 ] == 9 );
+}
+
+TEST_CASE( "unique_ptr supports operator[]" )
+{
+    std::unique_ptr< int[] > squares{ new int [ 5 ] { 0, 4, 9, 16, 25 } };
     squares[ 0 ] = 1;
     REQUIRE( squares[ 0 ] == 1 );
     REQUIRE( squares[ 1 ] == 4 );
