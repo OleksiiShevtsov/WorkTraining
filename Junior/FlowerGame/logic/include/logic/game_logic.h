@@ -37,12 +37,15 @@ namespace flower {
         common::SnakeState m_snakeState;
         common::SnakeGrowth m_snakeGrowth;
         common::NewSnake m_newSnake;
+        
+        // TODO put all threads in one function
         std::unique_ptr< std::thread > m_coinCountingFunction;
         std::unique_ptr< std::thread > m_snakeStateFunction;
         std::unique_ptr< std::thread > m_snakeGrowthFunction;
         std::unique_ptr< std::thread > m_newSnakeFunction;
         std::unique_ptr< std::thread > m_snakeSpeedFunction;
         std::unique_ptr< std::thread > m_reductionAppearanceNewSnakeFunction;
+        
         StateObjects m_stateObjects{ common::GlobalSettings::pixelCountX, common::GlobalSettings::pixelCountY };
         app::AppRendering m_appRendering;
     };

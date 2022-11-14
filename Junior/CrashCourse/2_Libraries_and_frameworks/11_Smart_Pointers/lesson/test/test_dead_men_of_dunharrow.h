@@ -28,7 +28,7 @@ TEST_CASE( "unique_ptr evaluates to" )
     SECTION( "true when full" )
     {
         auto sonOfArartorn{ std::move( aragorn ) };
-        REQUIRE(DeadMenOfDunharrow::oathsToFulfill == 1);
+        REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 1 );
     }
     SECTION( "false when empty" )
     {
@@ -154,4 +154,27 @@ TEST_CASE( "unique_ptr supports operator[]" )
     REQUIRE( squares[ 0 ] == 1 );
     REQUIRE( squares[ 1 ] == 4 );
     REQUIRE( squares[ 2 ] == 9 );
+}
+
+TEST_CASE( "shared_ptr can be used in copy" )
+{
+    auto aragorn = std::make_shared<DeadMenOfDunharrow>();
+    SECTION( "true when full" )
+    {
+        auto sonOfArartorn{ aragorn };
+        REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 1 );
+    }
+    SECTION( "assigment" )
+    {
+        SharedOathbreakers sonOfArartorn;
+        sonOfArartorn = aragorn;
+        REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 1 );
+    }
+    SECTION( "assigment, and original gets discarded" )
+    {
+        auto sonOfArartorn = std::make_shared<DeadMenOfDunharrow>();
+        REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 2 );
+        sonOfArartorn = aragorn;
+        REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 1 );
+    }
 }

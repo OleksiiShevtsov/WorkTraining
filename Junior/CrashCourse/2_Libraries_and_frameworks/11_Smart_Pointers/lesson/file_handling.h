@@ -5,7 +5,7 @@
 
 using FileGuard = std::unique_ptr< FILE, int( * )( FILE* ) >;
 
-void seyHello( FileGuard file )
+void fprintToFile( FileGuard file )
 {
     fprintf( file.get(), "text" );
 }
@@ -18,7 +18,7 @@ int fileHandling()
     FileGuard fileGuard{ file, fclose };
 
     // open file
-    seyHello( std::move( fileGuard ) );
+    fprintToFile( std::move( fileGuard ) );
 
     // file close
     return 0;
