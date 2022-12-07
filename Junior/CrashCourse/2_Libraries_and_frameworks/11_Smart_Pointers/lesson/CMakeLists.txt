@@ -4,7 +4,9 @@ project(lesson)
 set(CMAKE_CXX_STANDARD 20)
 
 set(SOURCE_FILES main.cpp
-                 test_dead_men_of_dunharrow.h
+                 test/test_dead_men_of_dunharrow.h
+                 file_handling.h
+                 
 )
 
 add_executable(lesson ${SOURCE_FILES})

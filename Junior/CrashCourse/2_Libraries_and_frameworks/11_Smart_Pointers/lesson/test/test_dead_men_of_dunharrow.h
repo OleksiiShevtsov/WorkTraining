@@ -158,7 +158,7 @@ TEST_CASE( "unique_ptr supports operator[]" )
 
 TEST_CASE( "shared_ptr can be used in copy" )
 {
-    auto aragorn = std::make_shared<DeadMenOfDunharrow>();
+    auto aragorn = std::make_shared< DeadMenOfDunharrow >();
     SECTION( "true when full" )
     {
         auto sonOfArartorn{ aragorn };
@@ -172,9 +172,44 @@ TEST_CASE( "shared_ptr can be used in copy" )
     }
     SECTION( "assigment, and original gets discarded" )
     {
-        auto sonOfArartorn = std::make_shared<DeadMenOfDunharrow>();
+        auto sonOfArartorn = std::make_shared< DeadMenOfDunharrow >();
         REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 2 );
         sonOfArartorn = aragorn;
         REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 1 );
     }
+}
+
+TEST_CASE( "weak_ptr lock() yields" )
+{
+    auto massage = "The way is shut";
+    SECTION( "a shared pointer when tracked object is alive" )
+    {
+        auto aragorn = std::make_shared< DeadMenOfDunharrow >( massage );
+        std::weak_ptr< DeadMenOfDunharrow > legolas{ aragorn };
+        auto shPtr = legolas.lock();
+        REQUIRE( shPtr->message == massage );
+        REQUIRE( shPtr.use_count() == 2 );
+    }
+    SECTION( "empty when shared pointer empty" )
+    {
+        std::weak_ptr< DeadMenOfDunharrow > legolas;
+        {
+            auto aragorn = std::make_shared< DeadMenOfDunharrow >( massage );
+            legolas = aragorn;
+        }
+        auto shPtr = legolas.lock();
+        REQUIRE( shPtr == nullptr );
+    }
+}
+
+TEST_CASE( "intrusive_ptr uses an embedded reference counter." )
+{
+    REQUIRE( refCount == 0 );
+    IntrusivPtr aragorn{ new DeadMenOfDunharrow{} };
+    REQUIRE( refCount == 1 );
+    {
+        IntrusivPtr legolas{ aragorn };
+        REQUIRE( refCount == 2 );
+    }
+    REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 1 );
 }
