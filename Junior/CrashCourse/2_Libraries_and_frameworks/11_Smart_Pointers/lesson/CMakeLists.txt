@@ -6,10 +6,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(SOURCE_FILES main.cpp
                  test/test_dead_men_of_dunharrow.h
                  file_handling.h
-                 
+                 allocator.h
 )
 
-add_executable(lesson ${SOURCE_FILES})
+add_executable(lesson ${SOURCE_FILES} "allocator.h")
 
 add_subdirectory(../../../../../../LIB/catch/Catch2 ${CMAKE_CURRENT_BINARY_DIR}/Catch2)
 target_link_libraries(${PROJECT_NAME} Catch2::Catch2)

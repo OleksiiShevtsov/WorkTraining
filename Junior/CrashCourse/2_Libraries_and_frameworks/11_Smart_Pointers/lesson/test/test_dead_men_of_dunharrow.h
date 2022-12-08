@@ -7,6 +7,7 @@
 #include <boost/scoped_array.hpp>
 
 #include "../dead_men_of_dunharrow.h"
+#include "../allocator.h"
 
 TEST_CASE( "scoped_ptr evaluates to" )
 {
@@ -212,4 +213,23 @@ TEST_CASE( "intrusive_ptr uses an embedded reference counter." )
         REQUIRE( refCount == 2 );
     }
     REQUIRE( DeadMenOfDunharrow::oathsToFulfill == 1 );
+}
+
+TEST_CASE("Allocator")
+{
+    auto message = "The way is shut.";
+    JAllocator< DeadMenOfDunharrow > alloc;
+
+    {
+        auto aragorn = std::allocate_shared< DeadMenOfDunharrow >(
+            alloc,
+            message);
+        
+        REQUIRE( aragorn->message == message );
+        REQUIRE( nAllocated == 1 );
+        REQUIRE( nDeallocated == 0 );
+    }
+
+    REQUIRE( nAllocated == 1 );
+    REQUIRE( nDeallocated == 1 );
 }

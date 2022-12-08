@@ -5,6 +5,7 @@
 
 #include "test/test_dead_men_of_dunharrow.h"
 #include "file_handling.h"
+#include "allocator.h"
 
 int main(int argc, char *argv[])
 {
