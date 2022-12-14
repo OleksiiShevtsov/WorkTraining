@@ -3,11 +3,11 @@
 #include <typeinfo>
 #include <stdexcept>
 
-#include "test/test.h"
+#include "test/test_utility.h"
 
 int main( int argc, char** argv )
 {
 	Catch::Session().run(argc, argv);
-	
+
     return 0;
 }

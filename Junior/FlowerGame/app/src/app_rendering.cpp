@@ -113,7 +113,7 @@ void flower::app::AppRendering::drowMap(){
     sf::Font font;
 
     // the path needs to be changed depending on the location of the build
-    if ( !font.loadFromFile( "../flower_game/app/fonts/arial.ttf" ) )
+    if ( !font.loadFromFile( "arial.ttf" ) )
     {
 
         std::cout << "textures not loaded" << std::endl;
