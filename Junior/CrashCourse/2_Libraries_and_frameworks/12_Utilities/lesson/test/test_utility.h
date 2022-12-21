@@ -23,7 +23,7 @@ TEST_CASE( "tribool" )
         REQUIRE_FALSE( indeterminate( t ) );
     }
 
-    SECTION("Boost tribool supports Boolean operations")
+    SECTION( "Boost tribool supports Boolean operations" )
     {
         auto tORf = t || f;
         REQUIRE( tORf.value );
@@ -50,7 +50,7 @@ TEST_CASE( "tribool" )
 
 TEST_CASE( "optional" )
 {
-    SECTION("std::optional constains types")
+    SECTION( "std::optional constains types" )
     {
         if(auto matrixOpt = take(JPill::Blue))
         {
@@ -60,7 +60,7 @@ TEST_CASE( "optional" )
         }
         else 
         {
-            FAIL("The optional evaluated to false");
+            FAIL( "The optional evaluated to false" );
         }
     }
 
@@ -77,16 +77,16 @@ TEST_CASE( "optional" )
 
 TEST_CASE( "pair" )
 {
+    std::pair< Socialite, Valet > inimitableDuo{ bertie, reginald };
+
     SECTION( "std::pair permits access to members" )
     {
-        std::pair< Socialite, Valet > inimitableDuo{ bertie, reginald };
         REQUIRE( inimitableDuo.first.birthname == bertie.birthname );
         REQUIRE( inimitableDuo.second.surname == reginald.surname );
     }
 
     SECTION( "std::pair works with structured binding" )
     {
-        std::pair< Socialite, Valet > inimitableDuo{ bertie, reginald };
         auto& [ idleRich, butler ] = inimitableDuo;
         REQUIRE( idleRich.birthname == bertie.birthname );
         REQUIRE( butler.surname == reginald.surname );
@@ -125,7 +125,7 @@ TEST_CASE( "variant" )
 {
     std::variant< BugblatterBeast, EsacapeCapsule > hagunemnon;
 
-    SECTION("std::variant")
+    SECTION( "std::variant" )
     {
         REQUIRE( hagunemnon.index() == 0 );
 
@@ -139,8 +139,12 @@ TEST_CASE( "variant" )
             std::bad_variant_access );
     }
 
-    SECTION("std::variant")
+    SECTION( "std::variant" )
     {
-        //
+        hagunemnon.emplace< EsacapeCapsule >( 600 );
+        auto lbs = std::visit(
+            []( auto& x ) { return 2.2 * x.weightKg; },
+            hagunemnon);
+        REQUIRE( lbs == 1320 );
     }
 }
