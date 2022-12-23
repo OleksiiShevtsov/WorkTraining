@@ -6,6 +6,7 @@
 #include "stopwatch.h"
 #include "test/test_utility.h"
 #include "test/test_data.h"
+#include "test/test_math.h"
 
 int main( int argc, char** argv )
 {

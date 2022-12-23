@@ -1,7 +1,7 @@
-cmake_minimum_required(VERSION 3.16.3)
+cmake_minimum_required(VERSION 3.8)
 project(lesson)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 set(SOURCE_FILES main.cpp
 )
