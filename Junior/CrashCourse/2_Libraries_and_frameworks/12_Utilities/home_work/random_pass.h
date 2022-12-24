@@ -2,25 +2,32 @@
 
 #include <random>
 
-std::mt19937_64 mtEngine{ 56756 };
-std::uniform_int_distribution< int > intDist{ 0, 'z' };
-const size_t passwordLength = 2;
+std::mt19937_64 mtEngine{ 57878 };
+std::uniform_int_distribution< int > intDistBool{ 0, 1 };
+std::uniform_int_distribution< int > intDistNum{ '0', '9' };
+std::uniform_int_distribution< int > intDistChar{ 'A', 'z' };
 
-char* randomPass() 
+const size_t passwordLength = 16;
+
+std::string randomPass() 
 {	
-	char newPass[ passwordLength ];
+	std::string newPass;
 
-	for (size_t i{}; i < passwordLength - 1; i++)
+	for (size_t i{}; i < passwordLength; i++)
 	{
-		newPass[ i ] = (char)intDist(mtEngine);
+		if (intDistBool(mtEngine)) 
+		{
+			newPass.push_back( ( char )intDistNum( mtEngine ) );
+		}
+		else 
+		{
+			newPass.push_back( ( char )intDistChar( mtEngine ) );
+		}
 	}
-	newPass[ passwordLength - 1 ] = '\0';
 	return newPass;
 }
 
 void randomPassCheck()
 {
-	std::string pass(randomPass());
-
-	std::cout << pass;
+	std::cout << randomPass() << std::endl;
 }

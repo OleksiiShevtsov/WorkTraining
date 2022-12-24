@@ -8,7 +8,7 @@
 
 int main( int argc, char** argv )
 {
-    Catch::Session().run(argc, argv);
+    //Catch::Session().run(argc, argv);
 
     randomPassCheck();
 
