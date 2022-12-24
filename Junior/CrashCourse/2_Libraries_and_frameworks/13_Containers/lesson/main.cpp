@@ -3,14 +3,11 @@
 #include <typeinfo>
 #include <stdexcept>
 
-#include "test/test_narrow_cast.h"
-#include "random_pass.h"
+#include "test/test.h"
 
 int main( int argc, char** argv )
 {
-    Catch::Session().run(argc, argv);
-
-    randomPassCheck();
+	Catch::Session().run(argc, argv);
 
     return 0;
 }

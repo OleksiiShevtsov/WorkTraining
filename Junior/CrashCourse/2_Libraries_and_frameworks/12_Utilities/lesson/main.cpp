@@ -14,7 +14,7 @@ int main( int argc, char** argv )
 
 	{
 		JStopwatch stopwatch{ elapsed };
-		Catch::Session().run(argc, argv);
+		Catch::Session().run( argc, argv );
 	}
 	
 	int res = std::chrono::duration_cast< std::chrono::milliseconds >( elapsed ).count();

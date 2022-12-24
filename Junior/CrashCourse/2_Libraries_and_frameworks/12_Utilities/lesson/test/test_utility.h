@@ -52,11 +52,11 @@ TEST_CASE( "optional" )
 {
     SECTION( "std::optional constains types" )
     {
-        if(auto matrixOpt = take(JPill::Blue))
+        if(auto matrixOpt = take( JPill::Blue ) )
         {
-            REQUIRE(matrixOpt->iteration == 6);
+            REQUIRE( matrixOpt->iteration == 6 );
             auto& matrix = matrixOpt.value();
-            REQUIRE(matrix.iteration == 6);
+            REQUIRE( matrix.iteration == 6 );
         }
         else 
         {
@@ -64,14 +64,14 @@ TEST_CASE( "optional" )
         }
     }
 
-    SECTION("std::optional can be empty")
+    SECTION( "std::optional can be empty" )
     {
-        auto matrixOpt = take(JPill::Red);
-        if(matrixOpt)
+        auto matrixOpt = take( JPill::Red );
+        if( matrixOpt )
         {
-            FAIL("The matrix is not empty");
+            FAIL( "The matrix is not empty" );
         }
-        REQUIRE_FALSE(matrixOpt.has_value());
+        REQUIRE_FALSE( matrixOpt.has_value() );
     }
 }
 
