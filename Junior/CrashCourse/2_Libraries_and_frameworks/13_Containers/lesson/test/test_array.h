@@ -52,3 +52,22 @@ TEST_CASE( "std::array access" )
         // std::get< 4 >( fib ); error!
     }
 }
+
+TEST_CASE( "std::array has convenience methods" )
+{
+    std::array< int, 4 > fib{ 0, 1, 2, 0 };
+
+    SECTION( "front" )
+    {
+        fib.front() = 1;
+        REQUIRE( fib.front() == 1 );
+        REQUIRE( fib.front() == fib[ 0 ] );
+    }
+
+    SECTION( "back" )
+    {
+        fib.back() = 3;
+        REQUIRE( fib.back() == 3 );
+        REQUIRE( fib.back() == fib[ 3 ] );
+    }
+}
