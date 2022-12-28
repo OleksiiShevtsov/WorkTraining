@@ -1,4 +1,4 @@
-current page		 - 490
+current page		 - 500
 ______________________________
 installation gdb	 - 82
 installation GDB and GCC - 66

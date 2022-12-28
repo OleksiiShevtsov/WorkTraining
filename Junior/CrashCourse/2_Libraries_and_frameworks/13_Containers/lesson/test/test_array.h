@@ -71,3 +71,58 @@ TEST_CASE( "std::array has convenience methods" )
         REQUIRE( fib.back() == fib[ 3 ] );
     }
 }
+
+TEST_CASE( "We can obtain a pointer to the first element using" )
+{
+    std::array< char, 9 > color{
+        'o', 'c', 't', 'a', 'r', 'i', 'n', 'e' };
+    const auto* colorPtr = color.data();
+
+    SECTION( "data" )
+    {
+        REQUIRE( *colorPtr == 'o' );
+    }
+
+    SECTION( "address-of front" )
+    {
+        REQUIRE( &color.front() == colorPtr );
+    }
+
+    SECTION( "address-of at( 0 )" )
+    {
+        REQUIRE( &color.at( 0 ) == colorPtr );
+    }
+
+    SECTION( "address-of [ 0 ]" )
+    {
+        REQUIRE( &color[ 0 ] == colorPtr );
+    }
+}
+
+TEST_CASE( "std::array bagin/end from a half-open range" )
+{
+    std::array< int, 0 > e{};
+    REQUIRE( e.begin() == e.end() );
+}
+
+TEST_CASE( "std::array iterators are pointer-like" )
+{
+    std::array< int, 3 > easyAs{ 1, 2, 3 };
+    auto iter = easyAs.begin();
+    REQUIRE( *iter == 1 );
+    ++iter;
+    REQUIRE( *iter == 2 );
+    ++iter;
+    REQUIRE( *iter == 3 );
+    ++iter;
+    REQUIRE( iter == easyAs.end() );
+}
+
+TEST_CASE( "std::array can be used as a range expression" )
+{
+    std::array< int, 5 > fib{ 1, 1, 2, 3, 5 };
+    int sum{};
+    for( const auto element : fib )
+        sum += element;
+    REQUIRE( sum == 12 );
+}
