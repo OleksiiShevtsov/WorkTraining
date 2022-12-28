@@ -71,3 +71,27 @@ TEST_CASE( "std::vector element methods forward arguments" )
     REQUIRE( factors[ 0 ].first == 1 );
     REQUIRE( factors[ 0 ].second == 60 );
 }
+
+TEST_CASE( "std::vector exposes size managment methods" )
+{
+    std::vector< std::array< uint8_t, 1024 > > kbStore;
+    REQUIRE( kbStore.max_size() > 0 );
+    REQUIRE( kbStore.empty() );
+
+    size_t elements{ 1024 };
+    kbStore.reserve( elements );
+    REQUIRE( kbStore.empty() );
+    REQUIRE( kbStore.capacity() == elements );
+
+    kbStore.emplace_back();
+    kbStore.emplace_back();
+    kbStore.emplace_back();
+    REQUIRE( kbStore.size() == 3 );
+
+    kbStore.shrink_to_fit();
+    REQUIRE( kbStore.capacity() >= 3 );
+
+    kbStore.clear();
+    REQUIRE( kbStore.empty() );
+    REQUIRE( kbStore.capacity() >= 3 );
+}

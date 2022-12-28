@@ -5,6 +5,7 @@
 
 #include "test/test_array.h"
 #include "test/test_vector.h"
+#include "test/test_d.h"
 
 int main( int argc, char** argv )
 {
