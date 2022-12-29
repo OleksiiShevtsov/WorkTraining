@@ -1,10 +1,13 @@
-cmake_minimum_required(VERSION 3.16.3)
+cmake_minimum_required(VERSION 3.16)
 project(flower_game)
 
 set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(lib/googletest)
-add_subdirectory(lib/SFML/)
+
+if(WIN32)
+    add_subdirectory(lib/SFML/)
+endif()
 
 add_subdirectory(logic)
 add_subdirectory(app)

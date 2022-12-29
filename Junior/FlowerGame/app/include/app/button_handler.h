@@ -3,7 +3,7 @@
 #include <SFML/Graphics.hpp>
 #include <thread>
 #include <memory>
-#include "windows.h"
+// #include "windows.h"
 
 #include "common/enum.h"
 #include "common/global_settings.h"

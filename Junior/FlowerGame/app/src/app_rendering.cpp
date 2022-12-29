@@ -4,8 +4,8 @@ flower::app::AppRendering::AppRendering() :
     m_textNumberOfCoins{ "0" },
     m_textInStatisticsBox{ "press any key to start" },
     m_window{ std::make_shared< sf::RenderWindow >( sf::VideoMode(
-        sf::Vector2u( common::GlobalSettings::pixelCountX * common::GlobalSettings::sizePixel,
-                      common::GlobalSettings::pixelCountY * common::GlobalSettings::sizePixel + statisticsBoxHeight ) ), "Flower" ) }{
+        common::GlobalSettings::pixelCountX * common::GlobalSettings::sizePixel,
+        common::GlobalSettings::pixelCountY * common::GlobalSettings::sizePixel + statisticsBoxHeight ), "Flower" ) }{
     m_buttonHandler = std::make_shared< ButtonHandler >( m_window );
 }
 
@@ -35,7 +35,7 @@ bool flower::app::AppRendering::isWindowOpen() const {
 
 void flower::app::AppRendering::drawObjects(){
     sf::Event event;
-    while ( m_window->pollEvent( event ) )
+    if ( m_window->pollEvent( event ) )
     {
         if (event.type == sf::Event::Closed)
             m_window->close();
@@ -113,7 +113,7 @@ void flower::app::AppRendering::drowMap(){
     sf::Font font;
 
     // the path needs to be changed depending on the location of the build
-    if ( !font.loadFromFile( "arial.ttf" ) )
+    if ( !font.loadFromFile( "../FlowerGame/app/fonts/arial.ttf" ) )
     {
 
         std::cout << "textures not loaded" << std::endl;
