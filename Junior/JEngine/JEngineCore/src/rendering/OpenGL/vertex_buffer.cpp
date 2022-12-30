@@ -12,7 +12,7 @@ jengine::JBufferElement::JBufferElement(const JShaderDataType _type) :
 jengine::JBufferLayout::JBufferLayout(std::initializer_list<JBufferElement> elements) :
     mElements{ std::move(elements) }
 {
-    rsize_t offset{ 0 };
+    size_t offset{ 0 };
     for (auto& element : mElements)
     {
         element.offset = offset;
