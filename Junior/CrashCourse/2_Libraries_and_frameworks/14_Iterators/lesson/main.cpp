@@ -3,9 +3,7 @@
 #include <typeinfo>
 #include <stdexcept>
 
-#include "test/test_array.h"
-#include "test/test_vector.h"
-#include "test/test_d.h"
+#include "test/test_iterators.h"
 
 int main( int argc, char** argv )
 {

@@ -1,4 +1,5 @@
-current page		 - 505
+current page		 - 505 
+( 547 - 566 )
 ______________________________
 installation gdb	 - 82
 installation GDB and GCC - 66
