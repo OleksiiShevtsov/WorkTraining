@@ -1,11 +1,13 @@
 #include "logic/dynamic_object.h"
 
-bof::DynamicObject::DynamicObject( common::ID id, common::Point dot ) :
+bof::DynamicObject::DynamicObject(common::ID id, common::Point dot, float speedLimit) :
     m_id{ id },
     m_dot{ dot },
     m_alpha{ 0.0f },
+    m_speedLimitm{ speedLimit },
     m_movementState{ common::MovementState::FREE },
-    m_movementStatePrev{ common::MovementState::FREE } {}
+    m_movementStatePrev{ common::MovementState::FREE }
+{}
 
 bof::common::ID bof::DynamicObject::getId() const 
 {
@@ -41,5 +43,3 @@ void bof::DynamicObject::setMovementState(common::MovementState movementState)
 {
     m_movementState = movementState;
 }
-
-

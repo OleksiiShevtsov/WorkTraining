@@ -6,7 +6,7 @@
 bof::GameLogic::GameLogic() :
     m_gameState{ common::GameState::START }
 {
-    m_dynamicObject.push_back( DynamicObject( 0, common::Point{ 100, 300 } ) );
+    m_dynamicObject.push_back( DynamicObject( 0, common::Point{ 100, 300 }, 20.0 ) );
 }
 
 void bof::GameLogic::startGame()

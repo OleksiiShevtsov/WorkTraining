@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+enum GameState
+{
+  Waiting = 0;
+  PreFlop = 1;
+  Flop = 2;
+  Turn = 3;
+  River = 4;
+  Muck = 5;
+  Showdown = 6;
+  Closed = 7;
+  Default = 8;
+  PreparingNextHand = 9;
+}
+
+enum SeatActions
+{
+  PostSB = 0;
+  PostBB = 1;
+  Bet = 2;
+  Raise = 3;
+  AllIn = 4;
+  Fold = 5;
+  Check = 6;
+  Call = 7;
+}
+
+enum PreActions
+{
+  NoPreaction = 0;
+  pFoldToAnyBet = 1;
+  pCheck = 2;
+  pCheckOrFold = 3 ;
+  pCall = 4;
+}
+
+enum KickReason
+{
+  SitoutLimit = 0;
+}
+
+message PlayerOnShowdownState
+{
+  int32 seat_idx = 1;
+  bool muck = 2;
+  repeated string cards = 3;
+}
+
+message PlayerInAllInState
+{
+  int32 seat_idx = 1;
+  repeated string cards = 2;
+  double win_percentage = 3;
+}
+
+message CardsShowState
+{
+repeated PlayerInAllInState player_in_allin = 1;
+}
+
+message WinnerState
+{
+  int32 seat_idx = 1;
+  int64 money_reward = 2;
+
+  // in case if we have side pots we don't set moneyReward field at all and we do not need to look there
+  repeated SidePotShortStackPerAmountInfo side_pots_short_stacks = 3;
+}
+
+message ShowdownState
+{
+  repeated WinnerState winners = 1;
+  repeated PlayerOnShowdownState player_on_showdown = 2;
+  HandPlayedInfo hand_played_info = 3;
+}
+
+message PreActionOptionsState
+{
+  repeated PreActions seat_pre_actions = 1;
+}
+
+message ActionOptionsState
+{
+  int64 min_bet = 1;
+  int64 max_bet = 2;
+  repeated SeatActions seat_actions = 3;
+}
+
+message SidePotShortStackPerAmountInfo
+{
+  int64 short_stack = 1;
+  int64 amount = 2;
+}
+
+// just for draw side pots on client table
+message SidePotInfo
+{
+  int64 short_stack = 1;
+  int64 amount = 2;
+}
+
+message PotInfo
+{
+  int64 amount = 1;
+  repeated SidePotInfo side_pots = 2;
+}
+
+message SeatState
+{
+  int32 seat_idx = 1;
+  bool is_folded = 2;
+  int64 stake = 3;
+  string name = 4;
+  string user_avatar = 5;
+  int64 bet = 6;
+  bool is_actions_available = 7;
+  oneof optional_last_action {
+    string last_action = 8;
+  }
+  repeated string cards = 9;
+  ActionOptionsState action_options = 10;
+  bool can_muck = 11;
+  bool is_playing = 12;
+  bool is_disconnected = 13;
+  bool in_sitout = 14;
+  bool can_rebuy = 15;
+  PreActionOptionsState pre_action_options = 16;
+  oneof optional_last_pre_action {
+    string last_pre_action = 17;
+  }
+  oneof optional_kick_reason {
+    KickReason kick_reason = 18;
+  }
+}
+
+message TableState
+{
+  int32 nt_type = 1;
+
+  int64 table_id = 2;
+  int32 seat_idx_bb = 3;
+  int32 seat_idx_sb = 4;
+  int32 seat_idx_btn = 5;
+  PotInfo pot = 6;
+  int32 bb_amount = 7;
+  int32 sb_amount = 8;
+  int64 action_time_limit = 9;
+  bool timebank_activated = 10;
+
+  GameState game_state = 11;
+
+  repeated SeatState seats = 12;
+  repeated string community_cards = 13;
+  repeated ShowdownState showdown_state = 14;
+  int32 my_seat_idx = 15;
+  repeated CardsShowState cards_show_state = 16;
+  string table_name = 17;
+
+  repeated uint64 spin_multipliers = 18;
+  uint64 active_spins_multiplier = 19;
+}
+
+message HandPlayedInfo {
+  string mongo_hand_id = 1;
+  string file_name = 2;
+  string hand_header = 3;
+  string hand_body = 4;
+}

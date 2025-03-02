@@ -8,32 +8,27 @@
 
 #include <chrono>
 
-// TODO delete
-#include <iostream>
-
 namespace bof {
 
-    // TODO
-
-    struct Param 
+    struct DynamicDotMovementParameters
     {
-        float cosPfi{};
-        float sinPfi{};
-        float Vx{};
-        float Vy{};
-        float Vx0{};
-        float Vy0{};
-        common::Coordinate X0{};
-        common::Coordinate Y0{};
+        float cosAcceleration{};
+        float sinAcceleration{};
+        float speedX{};
+        float speedY{};
+        float initialSpeedX{};
+        float initialSpeedY{};
+        common::Coordinate initialCoordinateX{};
+        common::Coordinate initialCoordinateY{};
         float currentTime{};
         std::chrono::milliseconds countdown{};
     };
 
-    class DynamicObject 
+    class DynamicObject
     {
     public:
 
-        DynamicObject( common::ID id, common::Point dot );
+        DynamicObject(common::ID id, common::Point dot, float speedLimit);
 
         common::ID getId() const;
         common::Point getDot() const;
@@ -44,13 +39,11 @@ namespace bof {
         void setAngle( common::Angle alpha );
         void setMovementState( common::MovementState movementState );
 
-        ///////////////////////////////////////////////
-
+        // TODO 
         const float del{ 2.0f };
         const float A{ 50.0f };
         const float Ftr{ -9.81f / 0.4f };
 
-        Param param;
         void recalculationDot()
         {
             if (m_movementState != m_movementStatePrev)
@@ -62,95 +55,100 @@ namespace bof {
 
             switch ( m_movementState )
             {
-                case common::MovementState::UP: 
-                    param.Vy = speedRecalculation(-A, param.Vy0);
-                    m_dot.y = coordinateRecalculation(-A, param.Vy0, param.Y0);
-                    if (param.Vx > del || param.Vx < -del)
+                case common::MovementState::UP:
+                    m_movementParameters.speedY = speedRecalculation(-A, m_movementParameters.initialSpeedY);
+                    m_dot.y = coordinateRecalculation(-A, m_movementParameters.initialSpeedY, m_movementParameters.initialCoordinateY);
+                    if (m_movementParameters.speedX > del || m_movementParameters.speedY < -del)
                     {
-                        param.Vx = speedRecalculation(Ftr * param.cosPfi, param.Vx0);
-                        m_dot.x = coordinateRecalculation(Ftr * param.cosPfi, param.Vx0, param.X0);
+                        m_movementParameters.speedX = speedRecalculation(Ftr * m_movementParameters.cosAcceleration, m_movementParameters.initialSpeedX);
+                        m_dot.x = coordinateRecalculation(Ftr * m_movementParameters.cosAcceleration, m_movementParameters.initialSpeedX, m_movementParameters.initialCoordinateX);
                     }
                     break;
-                case common::MovementState::DOWN: 
-                    param.Vy = speedRecalculation(A, param.Vy0);
-                    m_dot.y = coordinateRecalculation(A, param.Vy0, param.Y0);
-                    if (param.Vx > del || param.Vx < -del)
+                case common::MovementState::DOWN:
+                    m_movementParameters.speedY = speedRecalculation(A, m_movementParameters.initialSpeedY);
+                    m_dot.y = coordinateRecalculation(A, m_movementParameters.initialSpeedY, m_movementParameters.initialCoordinateY);
+                    if (m_movementParameters.speedX > del || m_movementParameters.speedX < -del)
                     {
-                        param.Vx = speedRecalculation(Ftr * param.cosPfi, param.Vx0);
-                        m_dot.x = coordinateRecalculation(Ftr * param.cosPfi, param.Vx0, param.X0);
+                        m_movementParameters.speedX = speedRecalculation(Ftr * m_movementParameters.cosAcceleration, m_movementParameters.initialSpeedX);
+                        m_dot.x = coordinateRecalculation(Ftr * m_movementParameters.cosAcceleration, m_movementParameters.initialSpeedX, m_movementParameters.initialCoordinateX);
                     }
                     break;
-                case common::MovementState::LEFT: 
-                    param.Vx = speedRecalculation( -A, param.Vx0 );
-                    m_dot.x = coordinateRecalculation( -A, param.Vx0, param.X0 );
-                    if ( param.Vy > del || param.Vy < -del )
+                case common::MovementState::LEFT:
+                    m_movementParameters.speedX = speedRecalculation( -A, m_movementParameters.initialSpeedX);
+                    m_dot.x = coordinateRecalculation( -A, m_movementParameters.initialSpeedX, m_movementParameters.initialCoordinateX);
+                    if (m_movementParameters.speedY > del || m_movementParameters.speedY < -del )
                     {
-                        param.Vy = speedRecalculation( Ftr * param.sinPfi, param.Vy0 );
-                        m_dot.y = coordinateRecalculation( Ftr * param.sinPfi, param.Vy0, param.Y0 );
+                        m_movementParameters.speedY = speedRecalculation( Ftr * m_movementParameters.sinAcceleration, m_movementParameters.initialSpeedY);
+                        m_dot.y = coordinateRecalculation( Ftr * m_movementParameters.sinAcceleration, m_movementParameters.initialSpeedY, m_movementParameters.initialCoordinateY);
                     }
                     break;
-                case common::MovementState::RIGHT: 
-                    param.Vx = speedRecalculation( A, param.Vx0 );
-                    m_dot.x = coordinateRecalculation( A, param.Vx0, param.X0 );
-                    if ( param.Vy > del || param.Vy < -del )
+                case common::MovementState::RIGHT:
+                    m_movementParameters.speedX = speedRecalculation( A, m_movementParameters.initialSpeedX);
+                    m_dot.x = coordinateRecalculation( A, m_movementParameters.initialSpeedX, m_movementParameters.initialCoordinateX);
+                    if (m_movementParameters.speedY > del || m_movementParameters.speedY < -del )
                     {
-                        param.Vy = speedRecalculation( Ftr * param.sinPfi, param.Vy0 );
-                        m_dot.y = coordinateRecalculation( Ftr * param.sinPfi, param.Vy0, param.Y0 );
+                        m_movementParameters.speedY = speedRecalculation( Ftr * m_movementParameters.sinAcceleration, m_movementParameters.initialSpeedY);
+                        m_dot.y = coordinateRecalculation( Ftr * m_movementParameters.sinAcceleration, m_movementParameters.initialSpeedY, m_movementParameters.initialCoordinateY);
                     }
                     break;
-                case common::MovementState::FREE: 
-                    if ( param.Vx > del || param.Vx < -del )
+                case common::MovementState::FREE:
+                    if (m_movementParameters.speedX > del || m_movementParameters.speedX < -del )
                     {
-                        param.Vx = speedRecalculation( Ftr * param.cosPfi, param.Vx0 );
-                        m_dot.x = coordinateRecalculation( Ftr * param.cosPfi, param.Vx0, param.X0 );
+
+                        m_movementParameters.speedX = speedRecalculation( Ftr * m_movementParameters.cosAcceleration, m_movementParameters.initialSpeedX);
+                        m_dot.x = coordinateRecalculation( Ftr * m_movementParameters.cosAcceleration, m_movementParameters.initialSpeedX, m_movementParameters.initialCoordinateX);
                     }
-                    if ( param.Vy > del || param.Vy < -del )
+                    if (m_movementParameters.speedY > del || m_movementParameters.speedY < -del )
                     {
-                        param.Vy = speedRecalculation( Ftr * param.sinPfi, param.Vy0);
-                        m_dot.y = coordinateRecalculation( Ftr * param.sinPfi, param.Vy0, param.Y0);
+                        m_movementParameters.speedY = speedRecalculation( Ftr * m_movementParameters.sinAcceleration, m_movementParameters.initialSpeedY);
+                        m_dot.y = coordinateRecalculation( Ftr * m_movementParameters.sinAcceleration, m_movementParameters.initialSpeedY, m_movementParameters.initialCoordinateY);
                     }
                     break;
             };   
         }
 
-        float speedRecalculation( float a, float V0 )
+    private:
+
+        float speedRecalculation( float acceleration, float initialSpeed )
         {
-            return a * param.currentTime + V0;
+            //float speed = acceleration * m_movementParameters.currentTime + initialSpeed;
+            //if(speed > m_speedLimitm) {
+            //    return m_speedLimitm;
+            //}
+            return acceleration * m_movementParameters.currentTime + initialSpeed;
         }
 
-        common::Coordinate coordinateRecalculation( float a, float V0, common::Coordinate x0 )
+        common::Coordinate coordinateRecalculation( float acceleration, float initialSpeed, common::Coordinate initialCoordinate)
         {
-            return a * pow(param.currentTime, 2) / 2 + V0 * param.currentTime + x0;
+            return acceleration * pow(m_movementParameters.currentTime, 2) / 2 + initialSpeed * m_movementParameters.currentTime + initialCoordinate;
         }
 
         void getTime()
         {
             float t1 = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now()).time_since_epoch().count();
-            float t2 = param.countdown.count();
-            param.currentTime = (t1 - t2) / 1000;
-            //std::cout << param.currentTime << std::endl;
+            float t2 = m_movementParameters.countdown.count();
+            m_movementParameters.currentTime = (t1 - t2) / 1000;
         }
 
         void resetEndpoints()
         {
-            param.cosPfi = param.Vx / sqrt(pow(param.Vx, 2) + pow(param.Vy, 2));
-            param.sinPfi = param.Vy / sqrt(pow(param.Vx, 2) + pow(param.Vy, 2));
-            param.Vx0 = param.Vx;
-            param.Vy0 = param.Vy;
-            param.X0 = m_dot.x;
-            param.Y0 = m_dot.y;
-            param.currentTime = 0;
-            param.countdown = std::chrono::time_point_cast <std::chrono::milliseconds> ( std::chrono::steady_clock::now() ).time_since_epoch();
+            m_movementParameters.cosAcceleration = m_movementParameters.speedX / sqrt(pow(m_movementParameters.speedX, 2) + pow(m_movementParameters.speedY, 2));
+            m_movementParameters.sinAcceleration = m_movementParameters.speedY / sqrt(pow(m_movementParameters.speedX, 2) + pow(m_movementParameters.speedY, 2));
+            m_movementParameters.initialSpeedX = m_movementParameters.speedX;
+            m_movementParameters.initialSpeedY = m_movementParameters.speedY;
+            m_movementParameters.initialCoordinateX = m_dot.x;
+            m_movementParameters.initialCoordinateY = m_dot.y;
+            m_movementParameters.currentTime = 0;
+            m_movementParameters.countdown = std::chrono::time_point_cast <std::chrono::milliseconds> (std::chrono::steady_clock::now()).time_since_epoch();
         }
-
-        ///////////////////////////////////////////////
 
     private:
         common::ID m_id;
         common::Point m_dot;
         common::Angle m_alpha;
+        float m_speedLimitm;
         common::MovementState m_movementState;
         common::MovementState m_movementStatePrev;
+        DynamicDotMovementParameters m_movementParameters;
     };
-
 }

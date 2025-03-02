@@ -20,19 +20,19 @@ void bof::app::InputHandler::join(){
 
 void bof::app::InputHandler::handlerKeyboard( std::shared_ptr< sf::RenderWindow > window ){
     while ( m_gameState != common::GameState::END ) {
-        if( sf::Keyboard::isKeyPressed( sf::Keyboard::Up ) )
+        if( sf::Keyboard::isKeyPressed( sf::Keyboard::Key::Up ) )
         {
             m_movementState = common::MovementState::UP;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
         {
             m_movementState = common::MovementState::DOWN;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
         {
             m_movementState = common::MovementState::RIGHT;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
         {
             m_movementState = common::MovementState::LEFT;
         }

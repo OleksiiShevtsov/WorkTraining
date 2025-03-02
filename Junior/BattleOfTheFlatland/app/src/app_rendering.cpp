@@ -1,12 +1,8 @@
 #include "app/app_rendering.h"
 
-bof::app::AppRendering::AppRendering() :
-    m_window{ std::make_shared< sf::RenderWindow >( sf::VideoMode( 
-        sf::Vector2u(
-            common::GlobalSettings::sizeWindowX, 
-            common::GlobalSettings::sizeWindowY ) ),
-        "Battle Of The Flatland" ) },
-    m_player{ std::make_shared< Player >() }
+bof::app::AppRendering::AppRendering()
+    : m_window{ std::make_shared< sf::RenderWindow >( sf::VideoMode( sf::Vector2u( common::GlobalSettings::sizeWindowX, common::GlobalSettings::sizeWindowY ) ), "Battle Of The Flatland" ) }
+    , m_player{ std::make_shared< Player >() }
 {
     m_inputHandler = std::make_shared< InputHandler >( m_window );
 }
@@ -33,10 +29,9 @@ bool bof::app::AppRendering::isWindowOpen() const
 
 void bof::app::AppRendering::draw()
 {
-    sf::Event event;
-    if ( m_window->pollEvent( event ) )
+    if ( const std::optional event = m_window->pollEvent() )
     {
-        if (event.type == sf::Event::Closed)
+        if (event->is<sf::Event::Closed>())
             m_window->close();
     }
     m_window->clear( sf::Color( 25, 25, 25 ) );

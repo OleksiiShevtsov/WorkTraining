@@ -16,13 +16,11 @@ namespace bof
         GameLogic();
 
         void startGame();
-
         void join();
 
     private:
 
         void closeGame();
-
         void getPlayerMovementStateFromApp();
         void sendStateDynamicObjectToAppRender();
         void gameState();
