@@ -7,7 +7,7 @@ namespace {
 
 constexpr std::uint16_t kPort = 54545;
 
-void print_usage(const char* argv0) {
+void printUsage(const char* argv0) {
   std::cout << "Usage: " << argv0 << " [--smoke]\n"
             << "  (default) long-running server loop\n"
             << "  --smoke   self-test then exit\n";
@@ -21,15 +21,15 @@ int main(int argc, char** argv) {
     if (std::strcmp(argv[i], "--smoke") == 0) {
       smoke = true;
     } else if (std::strcmp(argv[i], "--help") == 0 || std::strcmp(argv[i], "-h") == 0) {
-      print_usage(argv[0]);
+      printUsage(argv[0]);
       return 0;
     } else {
       std::cerr << "Unknown argument: " << argv[i] << '\n';
-      print_usage(argv[0]);
+      printUsage(argv[0]);
       return 1;
     }
   }
 
   botf::ServerEngine engine;
-  return smoke ? engine.run_smoke(kPort) : engine.run(kPort);
+  return smoke ? engine.runSmoke(kPort) : engine.run(kPort);
 }

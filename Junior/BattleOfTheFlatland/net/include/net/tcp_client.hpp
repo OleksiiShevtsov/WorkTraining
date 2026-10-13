@@ -27,19 +27,19 @@ class TcpClient {
   // Send queued outbound + recv into inbound. Call from the client frame loop.
   void poll();
 
-  [[nodiscard]] bool is_connected() const { return m_connected; }
+  [[nodiscard]] bool isConnected() const { return m_connected; }
 
  private:
-  void dispatch_outbound();
-  void receive_inbound();
-  void flush_send_buffer();
+  void dispatchOutbound();
+  void receiveInbound();
+  void flushSendBuffer();
 
   ClientInboundQueue& m_inbound;
   OutboundQueue& m_outbound;
 
   sf::TcpSocket m_socket;
-  std::vector<std::uint8_t> m_recv_buffer;
-  std::vector<std::uint8_t> m_send_buffer;
+  std::vector<std::uint8_t> m_recvBuffer;
+  std::vector<std::uint8_t> m_sendBuffer;
   bool m_connected = false;
 };
 

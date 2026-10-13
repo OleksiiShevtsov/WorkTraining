@@ -13,7 +13,7 @@ class Player {
   Player& operator=(const Player&) = delete;
 
   [[nodiscard]] common::ID id() const;
-  void set_id(common::ID id);
+  void setId(common::ID id);
 
  private:
   common::ID m_id{0};

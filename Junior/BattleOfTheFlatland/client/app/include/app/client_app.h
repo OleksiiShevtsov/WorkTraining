@@ -21,13 +21,13 @@ class ClientApp {
   int run(std::uint16_t port = 54545);
 
   // No window: validate WorldState framing → SceneObject mapping.
-  static int run_smoke();
+  static int runSmoke();
 
  private:
-  void apply_inbound();
-  void maybe_send_move(const MoveInput& input, std::uint32_t tick);
+  void applyInbound();
+  void maybeSendMove(const MoveInput& input, std::uint32_t tick);
 
-  static std::vector<SceneObject> scene_from_world_state(const WorldState& state);
+  static std::vector<SceneObject> sceneFromWorldState(const WorldState& state);
 
   net::ClientInboundQueue m_inbound;
   net::OutboundQueue m_outbound;
@@ -35,9 +35,9 @@ class ClientApp {
   AppRendering m_rendering;
 
   std::uint64_t m_sequence = 1;
-  MoveInput m_last_sent{};
-  bool m_force_send = true;
-  std::optional<WorldState> m_latest_world;
+  MoveInput m_lastSent{};
+  bool m_forceSend = true;
+  std::optional<WorldState> m_latestWorld;
 };
 
 }  // namespace botf::app

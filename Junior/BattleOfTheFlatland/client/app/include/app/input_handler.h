@@ -8,7 +8,7 @@ namespace botf::app {
 class InputHandler {
  public:
   // Axes in {-1, 0, 1}; diagonals allowed. Idle = {0, 0}.
-  [[nodiscard]] MoveInput read_move_input() const;
+  [[nodiscard]] MoveInput readMoveInput() const;
 };
 
 }  // namespace botf::app

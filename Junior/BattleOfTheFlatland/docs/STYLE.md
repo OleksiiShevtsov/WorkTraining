@@ -4,19 +4,32 @@
 
 | Что | Стиль | Пример |
 |-----|--------|--------|
-| Члены класса | `m_` + snake_case | `m_position`, `m_clients` |
-| Локальные / параметры | snake_case без префикса | `client_id`, `dt` |
+| Члены класса | `m_` + camelCase | `m_position`, `m_latestWorld` |
+| Локальные / параметры | camelCase без префикса | `clientId`, `tickStart` |
+| Свободные функции / методы | camelCase | `sceneFromWorldState`, `buildWorldState` |
 | Константы | `k` + PascalCase | `kTickHz`, `kPort` |
-| Свободные функции | snake_case | `build_world_state` |
 | Типы / классы | PascalCase | `GameLogic`, `TcpServer` |
 | Namespaces | `botf::…` | `botf::net`, `botf::logic`, `botf::app` |
 
 Не использовать trailing underscore (`foo_`) для members.
 
+Исключения (оставляем как есть):
+
+- идентификаторы STL / языка (`static_cast`, `push_back`, `std::unordered_map`, …)
+- сгенерированный protobuf API (`set_tick`, `players_size`, `mutable_position`, …)
+
+> `clang-format` правит только пробелы/переносы; переименование идентификаторов — вручную / рефакторингом по этой таблице.
+
 ## Форматирование
 
 Корень проекта: `.clang-format` (Google-based, 2 spaces, column 100).  
 При сборке target `botf_format` прогоняет `*.cpp` / `*.h` / `*.hpp` модулей проекта.
+
+```bash
+./format.sh
+# или
+cmake --build build --target botf_format
+```
 
 ## Слои (ориентир)
 

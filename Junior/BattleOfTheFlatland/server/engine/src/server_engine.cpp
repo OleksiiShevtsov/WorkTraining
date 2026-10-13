@@ -23,20 +23,20 @@ constexpr int kTickHz = 20;
 constexpr float kDt = 1.0f / static_cast<float>(kTickHz);
 constexpr auto kTickPeriod = std::chrono::milliseconds(1000 / kTickHz);
 
-std::atomic<ServerEngine*> g_active_engine{nullptr};
+std::atomic<ServerEngine*> gActiveEngine{nullptr};
 
-void on_signal(int) {
-  if (ServerEngine* engine = g_active_engine.load()) {
-    engine->request_stop();
+void onSignal(int) {
+  if (ServerEngine* engine = gActiveEngine.load()) {
+    engine->requestStop();
   }
 }
 
-bool send_framed(sf::TcpSocket& socket, const std::string& envelope_bytes) {
-  const auto packet = net::frame_payload(envelope_bytes);
+bool sendFramed(sf::TcpSocket& socket, const std::string& envelopeBytes) {
+  const auto packet = net::framePayload(envelopeBytes);
   return socket.send(packet.data(), packet.size()) == sf::Socket::Status::Done;
 }
 
-WorldState build_world_state(const GameLogic& game, std::uint32_t tick) {
+WorldState buildWorldState(const GameLogic& game, std::uint32_t tick) {
   WorldState state;
   state.set_tick(tick);
   for (const auto& obj : game.objects()) {
@@ -50,13 +50,13 @@ WorldState build_world_state(const GameLogic& game, std::uint32_t tick) {
   return state;
 }
 
-bool recv_one_frame(sf::TcpSocket& socket,
-                    std::vector<std::uint8_t>& buffer,
-                    std::string& out_payload,
-                    int attempts) {
+bool recvOneFrame(sf::TcpSocket& socket,
+                  std::vector<std::uint8_t>& buffer,
+                  std::string& outPayload,
+                  int attempts) {
   for (int i = 0; i < attempts; ++i) {
-    if (auto payload = net::try_consume_frame(buffer)) {
-      out_payload = std::move(*payload);
+    if (auto payload = net::tryConsumeFrame(buffer)) {
+      outPayload = std::move(*payload);
       return true;
     }
 
@@ -80,18 +80,18 @@ bool recv_one_frame(sf::TcpSocket& socket,
 ServerEngine::ServerEngine() : m_server(m_inbound, m_outbound) {}
 
 ServerEngine::~ServerEngine() {
-  request_stop();
+  requestStop();
   shutdown();
-  if (g_active_engine.load() == this) {
-    g_active_engine.store(nullptr);
+  if (gActiveEngine.load() == this) {
+    gActiveEngine.store(nullptr);
   }
 }
 
-void ServerEngine::request_stop() {
+void ServerEngine::requestStop() {
   m_running = false;
 }
 
-bool ServerEngine::start_listen(std::uint16_t port) {
+bool ServerEngine::startListen(std::uint16_t port) {
   return m_server.listen(port);
 }
 
@@ -99,87 +99,87 @@ void ServerEngine::shutdown() {
   m_server.stop();
 }
 
-void ServerEngine::ensure_client_bound(ClientId client_id) {
-  if (m_game.entity_for_client(client_id).has_value()) {
+void ServerEngine::ensureClientBound(ClientId clientId) {
+  if (m_game.entityForClient(clientId).has_value()) {
     return;
   }
 
-  if (!m_game.objects().empty() && client_id == m_game.objects().front().id()) {
-    m_game.bind_client(client_id, m_game.objects().front().id());
+  if (!m_game.objects().empty() && clientId == m_game.objects().front().id()) {
+    m_game.bindClient(clientId, m_game.objects().front().id());
     return;
   }
 
-  const common::ID entity = m_game.spawn_player(
+  const common::ID entity = m_game.spawnPlayer(
       common::Point{common::GlobalSettings::defaultSpawnX, common::GlobalSettings::defaultSpawnY},
       common::GlobalSettings::defaultPlayerSpeedLimit);
-  m_game.bind_client(client_id, entity);
+  m_game.bindClient(clientId, entity);
 }
 
-void ServerEngine::apply_inbound_move(bool verbose) {
-  while (auto note = m_inbound.try_pop()) {
+void ServerEngine::applyInboundMove(bool verbose) {
+  while (auto note = m_inbound.tryPop()) {
     Envelope envelope;
     if (!envelope.ParseFromString(note->payload)) {
-      std::cerr << "[server] bad envelope from client " << note->client_id << '\n';
+      std::cerr << "[server] bad envelope from client " << note->clientId << '\n';
       continue;
     }
 
     if (envelope.type() != MESSAGE_TYPE_MOVE) {
       if (verbose) {
-        std::cout << "[server] ignore type=" << envelope.type() << " from client "
-                  << note->client_id << '\n';
+        std::cout << "[server] ignore type=" << envelope.type() << " from client " << note->clientId
+                  << '\n';
       }
       continue;
     }
 
     Move move;
     if (!move.ParseFromString(envelope.payload())) {
-      std::cerr << "[server] bad Move payload from client " << note->client_id << '\n';
+      std::cerr << "[server] bad Move payload from client " << note->clientId << '\n';
       continue;
     }
 
-    move = net::normalize_move(move);
-    m_input_states[note->client_id] = ClientInputState{move, envelope.sequence()};
+    move = net::normalizeMove(move);
+    m_inputStates[note->clientId] = ClientInputState{move, envelope.sequence()};
 
-    ensure_client_bound(note->client_id);
-    m_game.set_client_input(note->client_id, move.dx(), move.dy());
+    ensureClientBound(note->clientId);
+    m_game.setClientInput(note->clientId, move.dx(), move.dy());
 
     if (verbose) {
-      std::cout << "[server] Move state client=" << note->client_id << " " << net::to_string(move)
+      std::cout << "[server] Move state client=" << note->clientId << " " << net::toString(move)
                 << " dx=" << move.dx() << " dy=" << move.dy() << " tick=" << move.tick()
                 << " seq=" << envelope.sequence() << '\n';
     }
   }
 }
 
-void ServerEngine::enqueue_world_state(std::uint32_t tick, std::uint64_t sequence) {
+void ServerEngine::enqueueWorldState(std::uint32_t tick, std::uint64_t sequence) {
   m_outbound.push(net::OutboundNotification{
       std::nullopt,
-      net::make_world_state_envelope(build_world_state(m_game, tick), sequence),
+      net::makeWorldStateEnvelope(buildWorldState(m_game, tick), sequence),
   });
 }
 
-int ServerEngine::run_loop() {
+int ServerEngine::runLoop() {
   std::cout << "[server] running on port " << m_server.port() << " at " << kTickHz
             << " Hz (Ctrl+C to stop)\n";
-  std::cout << "[server] Move → GameLogic.set_client_input → tick(" << kDt
+  std::cout << "[server] Move → GameLogic.setClientInput → tick(" << kDt
             << ") → WorldState broadcast\n";
 
-  std::uint64_t server_tick = 0;
+  std::uint64_t serverTick = 0;
   m_running = true;
   while (m_running) {
-    const auto tick_start = std::chrono::steady_clock::now();
+    const auto tickStart = std::chrono::steady_clock::now();
 
     m_server.poll();
-    apply_inbound_move(true);
+    applyInboundMove(true);
     m_game.tick(kDt);
-    ++server_tick;
-    enqueue_world_state(static_cast<std::uint32_t>(server_tick), server_tick);
+    ++serverTick;
+    enqueueWorldState(static_cast<std::uint32_t>(serverTick), serverTick);
     m_server.poll();
 
-    if (server_tick % static_cast<std::uint64_t>(kTickHz) == 0) {
+    if (serverTick % static_cast<std::uint64_t>(kTickHz) == 0) {
       const auto& objects = m_game.objects();
-      std::cout << "[server] heartbeat tick=" << server_tick
-                << " clients=" << m_server.client_count() << " entities=" << objects.size();
+      std::cout << "[server] heartbeat tick=" << serverTick << " clients=" << m_server.clientCount()
+                << " entities=" << objects.size();
       if (!objects.empty()) {
         const auto p = objects.front().position();
         std::cout << " p0=(" << p.x << "," << p.y << ")";
@@ -187,7 +187,7 @@ int ServerEngine::run_loop() {
       std::cout << '\n';
     }
 
-    const auto elapsed = std::chrono::steady_clock::now() - tick_start;
+    const auto elapsed = std::chrono::steady_clock::now() - tickStart;
     if (elapsed < kTickPeriod) {
       std::this_thread::sleep_for(kTickPeriod - elapsed);
     }
@@ -198,23 +198,23 @@ int ServerEngine::run_loop() {
 }
 
 int ServerEngine::run(std::uint16_t port) {
-  g_active_engine.store(this);
-  std::signal(SIGINT, on_signal);
-  std::signal(SIGTERM, on_signal);
+  gActiveEngine.store(this);
+  std::signal(SIGINT, onSignal);
+  std::signal(SIGTERM, onSignal);
 
-  if (!start_listen(port)) {
-    g_active_engine.store(nullptr);
+  if (!startListen(port)) {
+    gActiveEngine.store(nullptr);
     return 1;
   }
 
-  const int code = run_loop();
+  const int code = runLoop();
   shutdown();
-  g_active_engine.store(nullptr);
+  gActiveEngine.store(nullptr);
   return code;
 }
 
-int ServerEngine::run_smoke(std::uint16_t port) {
-  if (!start_listen(port)) {
+int ServerEngine::runSmoke(std::uint16_t port) {
+  if (!startListen(port)) {
     return 1;
   }
 
@@ -240,12 +240,11 @@ int ServerEngine::run_smoke(std::uint16_t port) {
   };
 
   const auto start = m_game.objects().front().position();
-  std::uint32_t sim_tick = 0;
-  std::vector<std::uint8_t> recv_buffer;
+  std::uint32_t simTick = 0;
+  std::vector<std::uint8_t> recvBuffer;
 
   for (const auto& sample : samples) {
-    if (!send_framed(client,
-                     net::make_move_envelope(sample.dx, sample.dy, sample.tick, sample.seq))) {
+    if (!sendFramed(client, net::makeMoveEnvelope(sample.dx, sample.dy, sample.tick, sample.seq))) {
       std::cerr << "[server] smoke client failed to send Move\n";
       shutdown();
       return 1;
@@ -254,8 +253,8 @@ int ServerEngine::run_smoke(std::uint16_t port) {
     bool got = false;
     for (int i = 0; i < 100 && !got; ++i) {
       m_server.poll();
-      apply_inbound_move(true);
-      if (m_input_states.count(1) && m_input_states[1].move.tick() == sample.tick) {
+      applyInboundMove(true);
+      if (m_inputStates.count(1) && m_inputStates[1].move.tick() == sample.tick) {
         got = true;
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(2));
@@ -268,13 +267,13 @@ int ServerEngine::run_smoke(std::uint16_t port) {
 
     for (int j = 0; j < 15; ++j) {
       m_game.tick(kDt);
-      ++sim_tick;
-      enqueue_world_state(sim_tick, sim_tick);
+      ++simTick;
+      enqueueWorldState(simTick, simTick);
       m_server.poll();
     }
   }
 
-  enqueue_world_state(sim_tick, sim_tick);
+  enqueueWorldState(simTick, simTick);
   for (int i = 0; i < 20; ++i) {
     m_server.poll();
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
@@ -282,34 +281,34 @@ int ServerEngine::run_smoke(std::uint16_t port) {
 
   client.setBlocking(false);
 
-  WorldState last_state;
-  bool got_world = false;
+  WorldState lastState;
+  bool gotWorld = false;
   for (int i = 0; i < 500; ++i) {
     m_server.poll();
     std::string payload;
-    if (!recv_one_frame(client, recv_buffer, payload, 1)) {
-      if (got_world && i > 50) {
+    if (!recvOneFrame(client, recvBuffer, payload, 1)) {
+      if (gotWorld && i > 50) {
         break;
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(2));
       continue;
     }
-    auto envelope = net::parse_envelope(payload);
+    auto envelope = net::parseEnvelope(payload);
     if (!envelope || envelope->type() != MESSAGE_TYPE_WORLD_STATE) {
       continue;
     }
-    auto state = net::parse_world_state_payload(envelope->payload());
+    auto state = net::parseWorldStatePayload(envelope->payload());
     if (!state || state->players_size() == 0) {
       continue;
     }
-    last_state = std::move(*state);
-    got_world = true;
+    lastState = std::move(*state);
+    gotWorld = true;
   }
 
   client.disconnect();
 
-  if (!m_input_states.count(1) || m_input_states[1].move.tick() != 4 ||
-      !net::is_idle(m_input_states[1].move)) {
+  if (!m_inputStates.count(1) || m_inputStates[1].move.tick() != 4 ||
+      !net::isIdle(m_inputStates[1].move)) {
     std::cerr << "[server] smoke failed: expected last state IDLE tick=4\n";
     shutdown();
     return 1;
@@ -325,13 +324,13 @@ int ServerEngine::run_smoke(std::uint16_t port) {
     return 1;
   }
 
-  if (!got_world) {
+  if (!gotWorld) {
     std::cerr << "[server] smoke failed: no WorldState received by client\n";
     shutdown();
     return 1;
   }
 
-  const auto& p0 = last_state.players(0);
+  const auto& p0 = lastState.players(0);
   const float dx = p0.position().x() - end.x;
   const float dy = p0.position().y() - end.y;
   if (dx * dx + dy * dy > 0.01f) {
@@ -341,8 +340,8 @@ int ServerEngine::run_smoke(std::uint16_t port) {
     return 1;
   }
 
-  std::cout << "[server] WorldState ok tick=" << last_state.tick()
-            << " players=" << last_state.players_size() << " p0=(" << p0.position().x() << ","
+  std::cout << "[server] WorldState ok tick=" << lastState.tick()
+            << " players=" << lastState.players_size() << " p0=(" << p0.position().x() << ","
             << p0.position().y() << ")\n";
   std::cout << "BattleOfTheFlatland server — smoke ok (Move + GameLogic + WorldState)\n";
   shutdown();

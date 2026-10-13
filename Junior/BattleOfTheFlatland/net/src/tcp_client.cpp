@@ -8,7 +8,7 @@
 namespace botf::net {
 namespace {
 
-void append_bytes(std::vector<std::uint8_t>& dst, const std::vector<std::uint8_t>& src) {
+void appendBytes(std::vector<std::uint8_t>& dst, const std::vector<std::uint8_t>& src) {
   dst.insert(dst.end(), src.begin(), src.end());
 }
 
@@ -33,21 +33,21 @@ bool TcpClient::connect(sf::IpAddress host, std::uint16_t port, sf::Time timeout
 
   m_socket.setBlocking(false);
   m_connected = true;
-  m_recv_buffer.clear();
-  m_send_buffer.clear();
+  m_recvBuffer.clear();
+  m_sendBuffer.clear();
   return true;
 }
 
 void TcpClient::disconnect() {
-  if (!m_connected && m_send_buffer.empty() && m_recv_buffer.empty()) {
+  if (!m_connected && m_sendBuffer.empty() && m_recvBuffer.empty()) {
     m_socket.disconnect();
     return;
   }
 
   m_socket.disconnect();
   m_connected = false;
-  m_recv_buffer.clear();
-  m_send_buffer.clear();
+  m_recvBuffer.clear();
+  m_sendBuffer.clear();
 }
 
 void TcpClient::poll() {
@@ -55,19 +55,19 @@ void TcpClient::poll() {
     return;
   }
 
-  dispatch_outbound();
-  receive_inbound();
-  flush_send_buffer();
+  dispatchOutbound();
+  receiveInbound();
+  flushSendBuffer();
 }
 
-void TcpClient::dispatch_outbound() {
-  while (auto note = m_outbound.try_pop()) {
+void TcpClient::dispatchOutbound() {
+  while (auto note = m_outbound.tryPop()) {
     // Client ignores targeting; every outbound goes to the connected server.
-    append_bytes(m_send_buffer, frame_payload(note->payload));
+    appendBytes(m_sendBuffer, framePayload(note->payload));
   }
 }
 
-void TcpClient::receive_inbound() {
+void TcpClient::receiveInbound() {
   while (m_connected) {
     std::array<char, 4096> chunk{};
     std::size_t received = 0;
@@ -85,18 +85,18 @@ void TcpClient::receive_inbound() {
       break;
     }
 
-    m_recv_buffer.insert(m_recv_buffer.end(), chunk.data(), chunk.data() + received);
+    m_recvBuffer.insert(m_recvBuffer.end(), chunk.data(), chunk.data() + received);
   }
 
-  while (auto payload = try_consume_frame(m_recv_buffer)) {
+  while (auto payload = tryConsumeFrame(m_recvBuffer)) {
     m_inbound.push(ClientInboundNotification{std::move(*payload)});
   }
 }
 
-void TcpClient::flush_send_buffer() {
-  while (m_connected && !m_send_buffer.empty()) {
+void TcpClient::flushSendBuffer() {
+  while (m_connected && !m_sendBuffer.empty()) {
     std::size_t sent = 0;
-    const auto status = m_socket.send(m_send_buffer.data(), m_send_buffer.size(), sent);
+    const auto status = m_socket.send(m_sendBuffer.data(), m_sendBuffer.size(), sent);
 
     if (status == sf::Socket::Status::Disconnected || status == sf::Socket::Status::Error) {
       std::cerr << "[net] client send failed — disconnecting\n";
@@ -105,8 +105,8 @@ void TcpClient::flush_send_buffer() {
     }
 
     if (sent > 0) {
-      m_send_buffer.erase(m_send_buffer.begin(),
-                          m_send_buffer.begin() + static_cast<std::ptrdiff_t>(sent));
+      m_sendBuffer.erase(m_sendBuffer.begin(),
+                         m_sendBuffer.begin() + static_cast<std::ptrdiff_t>(sent));
     }
 
     if (status == sf::Socket::Status::Partial || status == sf::Socket::Status::NotReady) {

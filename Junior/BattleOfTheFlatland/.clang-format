@@ -1,5 +1,12 @@
 # BattleOfTheFlatland — matches existing sources (2-space, Attach braces).
 # Visual Studio: enables Format Document with ClangFormat when this file is present.
+#
+# Naming (not enforced by clang-format — see docs/STYLE.md):
+#   functions / locals / params  → camelCase  (sceneFromWorldState)
+#   members                      → m_ + camelCase  (m_latestWorld)
+#   types                        → PascalCase
+#   constants                    → k + PascalCase
+# Keep STL / language / protobuf identifiers in their native snake_case.
 BasedOnStyle: Google
 Language: Cpp
 

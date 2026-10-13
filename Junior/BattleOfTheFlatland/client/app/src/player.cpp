@@ -10,7 +10,7 @@ common::ID Player::id() const {
   return m_id;
 }
 
-void Player::set_id(common::ID id) {
+void Player::setId(common::ID id) {
   m_id = id;
 }
 

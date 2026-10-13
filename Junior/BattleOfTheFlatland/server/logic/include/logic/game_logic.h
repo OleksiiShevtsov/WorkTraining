@@ -18,29 +18,29 @@ class GameLogic {
   GameLogic& operator=(const GameLogic&) = delete;
 
   // Spawn a controllable entity; returns its logic id.
-  common::ID spawn_player(common::Point at, float speed_limit);
+  common::ID spawnPlayer(common::Point at, float speedLimit);
 
   // Bind a network client to a logic entity (one entity per client).
-  void bind_client(ClientId client_id, common::ID entity_id);
+  void bindClient(ClientId clientId, common::ID entityId);
 
   // Apply Move-state input for a network client (no-op if unbound).
-  void set_client_input(ClientId client_id, int dx, int dy);
+  void setClientInput(ClientId clientId, int dx, int dy);
 
   // Apply input directly by entity id.
-  void set_player_input(common::ID entity_id, int dx, int dy);
+  void setPlayerInput(common::ID entityId, int dx, int dy);
 
   // Advance the world by dt seconds.
   void tick(float dt);
 
   [[nodiscard]] const std::vector<DynamicObject>& objects() const;
-  [[nodiscard]] std::optional<common::ID> entity_for_client(ClientId client_id) const;
+  [[nodiscard]] std::optional<common::ID> entityForClient(ClientId clientId) const;
 
  private:
-  DynamicObject* find_mutable(common::ID entity_id);
+  DynamicObject* findMutable(common::ID entityId);
 
   std::vector<DynamicObject> m_objects;
-  std::unordered_map<ClientId, common::ID> m_client_to_entity;
-  common::ID m_next_entity_id{1};
+  std::unordered_map<ClientId, common::ID> m_clientToEntity;
+  common::ID m_nextEntityId{1};
 };
 
 }  // namespace botf

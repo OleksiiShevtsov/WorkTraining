@@ -4,7 +4,7 @@
 
 namespace botf::app {
 
-MoveInput InputHandler::read_move_input() const {
+MoveInput InputHandler::readMoveInput() const {
   MoveInput input{};
 
   const bool up = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) ||

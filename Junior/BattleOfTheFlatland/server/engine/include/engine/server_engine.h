@@ -10,7 +10,7 @@
 namespace botf {
 
 // Server runtime: TCP + GameLogic tick + WorldState broadcast.
-// main should only parse args and call run() / run_smoke().
+// main should only parse args and call run() / runSmoke().
 class ServerEngine {
  public:
   ServerEngine();
@@ -23,9 +23,9 @@ class ServerEngine {
   int run(std::uint16_t port = 54545);
 
   // Self-test: Move samples → tick → WorldState round-trip, then exit.
-  int run_smoke(std::uint16_t port = 54545);
+  int runSmoke(std::uint16_t port = 54545);
 
-  void request_stop();
+  void requestStop();
 
  private:
   struct ClientInputState {
@@ -33,19 +33,19 @@ class ServerEngine {
     std::uint64_t sequence = 0;
   };
 
-  bool start_listen(std::uint16_t port);
+  bool startListen(std::uint16_t port);
   void shutdown();
 
-  void ensure_client_bound(ClientId client_id);
-  void apply_inbound_move(bool verbose);
-  void enqueue_world_state(std::uint32_t tick, std::uint64_t sequence);
-  int run_loop();
+  void ensureClientBound(ClientId clientId);
+  void applyInboundMove(bool verbose);
+  void enqueueWorldState(std::uint32_t tick, std::uint64_t sequence);
+  int runLoop();
 
   net::InboundQueue m_inbound;
   net::OutboundQueue m_outbound;
   net::TcpServer m_server;
   GameLogic m_game;
-  std::unordered_map<ClientId, ClientInputState> m_input_states;
+  std::unordered_map<ClientId, ClientInputState> m_inputStates;
   bool m_running = false;
 };
 
