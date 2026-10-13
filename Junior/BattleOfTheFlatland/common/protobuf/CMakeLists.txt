@@ -1,29 +1,38 @@
 project(proto_messages)
 
-add_subdirectory(../../../../../LIB/protobuf  ${CMAKE_CURRENT_BINARY_DIR}/protobuf)
-find_package(protobuf REQUIRED)
+# Protobuf codegen for length-prefixed game packets over SFML TCP.
 
-set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
+set(BOTF_PROTO_DIR ${CMAKE_CURRENT_SOURCE_DIR}/messages)
 
-message(STATUS "Using Protocol Buffers ${protobuf_VERSION}")
+if(NOT BOTF_LIB_ROOT)
+    include("${CMAKE_SOURCE_DIR}/cmake/BotfLibRoot.cmake")
+endif()
 
-set(protobuf_output_dir ${CMAKE_BINARY_DIR}/notifications/protobuf/output/)
-file(MAKE_DIRECTORY ${protobuf_output_dir})
+if(WIN32 AND EXISTS "${BOTF_LIB_ROOT}/protobuf/CMakeLists.txt")
+    add_subdirectory(
+        "${BOTF_LIB_ROOT}/protobuf"
+        ${CMAKE_CURRENT_BINARY_DIR}/protobuf_lib
+    )
+endif()
 
-set(protobuf_templates_dir ${CMAKE_SOURCE_DIR}/notifications/protobuf/messages/)
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${protobuf_templates_dir})
+find_package(Protobuf REQUIRED)
 
-file(GLOB messages_proto CONFIGURE_DEPENDS "messages/*.proto")
-protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS ${messages_proto})
+file(GLOB BOTF_PROTO_FILES CONFIGURE_DEPENDS "${BOTF_PROTO_DIR}/*.proto")
 
-list(LENGTH PROTO_SRCS PROTO_SRCS_LEN)
-message(STATUS "[Protobuf] ${PROTO_SRCS_LEN} cpp files were generated")
+protobuf_generate_cpp(BOTF_PROTO_SRCS BOTF_PROTO_HDRS ${BOTF_PROTO_FILES})
 
-add_library(${PROJECT_NAME} STATIC ${PROTO_SRCS} ${PROTO_HDRS})
+add_library(${PROJECT_NAME} STATIC ${BOTF_PROTO_SRCS} ${BOTF_PROTO_HDRS})
 
-# Выводим сгенерированные пути
-message(STATUS "Generated Protobuf file: ${PROTO_SRCS}")
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        ${CMAKE_CURRENT_BINARY_DIR}
+)
 
-# Включение директории с заголовками и линковка с библиотекой Protobuf
-target_include_directories(${PROJECT_NAME} PUBLIC output ${protobuf_output_dir})
-target_link_libraries(${PROJECT_NAME} PUBLIC protobuf)
+if(TARGET protobuf::libprotobuf)
+    target_link_libraries(${PROJECT_NAME} PUBLIC protobuf::libprotobuf)
+else()
+    target_link_libraries(${PROJECT_NAME} PUBLIC ${Protobuf_LIBRARIES})
+    target_include_directories(${PROJECT_NAME} PUBLIC ${Protobuf_INCLUDE_DIRS})
+endif()
+
+message(STATUS "[botf] protobuf: ${Protobuf_VERSION}; protos: ${BOTF_PROTO_FILES}")

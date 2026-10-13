@@ -5,6 +5,12 @@ file(GLOB tests_SRC CONFIGURE_DEPENDS
   "helpers/*.h"
 )
 
-add_executable(${PROJECT_NAME} ${tests_SRC})
-
-target_link_libraries(${PROJECT_NAME} PUBLIC gtest gtest_main PRIVATE logic)
+if(tests_SRC)
+    add_executable(${PROJECT_NAME} ${tests_SRC})
+    # Game-rule tests can link server/logic when sources appear.
+    target_link_libraries(${PROJECT_NAME} PUBLIC gtest gtest_main)
+else()
+    add_custom_target(${PROJECT_NAME}
+        COMMENT "tests: no sources yet (add *.cpp under tests/)"
+    )
+endif()
