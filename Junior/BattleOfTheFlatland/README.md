@@ -117,14 +117,14 @@ BattleOfTheFlatland/
 │   └── protobuf/messages/
 ├── net/                 # TcpServer, TcpClient, framing, queues
 ├── server/
-│   ├── engine/          # ServerEngine (tick loop)
+│   ├── engine/          # ServerEngine (tick loop) + runServerSmoke
 │   └── logic/           # GameLogic / DynamicObject
 ├── client/
 │   └── app/             # ClientApp + AppRendering / InputHandler
 └── tests/
 ```
 
-`main` тонкий: `ServerEngine` / `ClientApp`.
+`main` тонкий: `ServerEngine` / `ClientApp` (server `--smoke` → `runServerSmoke`).
 
 ```
 Move (client → server) → GameLogic.tick → WorldState (server → clients) → draw

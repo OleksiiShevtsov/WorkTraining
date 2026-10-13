@@ -5,12 +5,13 @@
 #include "net/tcp_server.hpp"
 
 #include <cstdint>
+#include <optional>
 #include <unordered_map>
 
 namespace botf {
 
 // Server runtime: TCP + GameLogic tick + WorldState broadcast.
-// main should only parse args and call run() / runSmoke().
+// main should only parse args and call run() (or runServerSmoke).
 class ServerEngine {
  public:
   ServerEngine();
@@ -22,10 +23,21 @@ class ServerEngine {
   // Listen and run the 20 Hz loop until signal / stop.
   int run(std::uint16_t port = 54545);
 
-  // Self-test: Move samples → tick → WorldState round-trip, then exit.
-  int runSmoke(std::uint16_t port = 54545);
-
   void requestStop();
+
+  // Orchestration steps shared by run() and server smoke.
+  bool startListen(std::uint16_t port);
+  void shutdown();
+  void pollNetwork();
+  void applyInboundMoves(bool verbose = false);
+  // game.tick(dt) + enqueue WorldState for the new sim tick.
+  void advanceSim(float dt);
+
+  [[nodiscard]] std::uint16_t port() const;
+  [[nodiscard]] std::size_t clientCount() const;
+  [[nodiscard]] const GameLogic& game() const;
+  [[nodiscard]] std::uint32_t simTick() const;
+  [[nodiscard]] std::optional<Move> lastMove(ClientId clientId) const;
 
  private:
   struct ClientInputState {
@@ -33,11 +45,7 @@ class ServerEngine {
     std::uint64_t sequence = 0;
   };
 
-  bool startListen(std::uint16_t port);
-  void shutdown();
-
   void ensureClientBound(ClientId clientId);
-  void applyInboundMove(bool verbose);
   void enqueueWorldState(std::uint32_t tick, std::uint64_t sequence);
   int runLoop();
 
@@ -46,6 +54,7 @@ class ServerEngine {
   net::TcpServer m_server;
   GameLogic m_game;
   std::unordered_map<ClientId, ClientInputState> m_inputStates;
+  std::uint32_t m_simTick = 0;
   bool m_running = false;
 };
 

@@ -1,5 +1,7 @@
 #include "engine/server_engine.h"
+#include "engine/server_smoke.h"
 
+#include <cstdint>
 #include <cstring>
 #include <iostream>
 
@@ -30,6 +32,10 @@ int main(int argc, char** argv) {
     }
   }
 
+  if (smoke) {
+    return botf::runServerSmoke(kPort);
+  }
+
   botf::ServerEngine engine;
-  return smoke ? engine.runSmoke(kPort) : engine.run(kPort);
+  return engine.run(kPort);
 }

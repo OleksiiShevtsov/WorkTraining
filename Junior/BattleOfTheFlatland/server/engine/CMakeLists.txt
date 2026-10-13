@@ -2,6 +2,7 @@ project(server_engine)
 
 add_library(${PROJECT_NAME} STATIC
     src/server_engine.cpp
+    src/server_smoke.cpp
 )
 
 target_include_directories(${PROJECT_NAME}

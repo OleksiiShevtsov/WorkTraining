@@ -36,4 +36,5 @@ cmake --build build --target botf_format
 - `net/` — транспорт (`TcpServer` / `TcpClient`, framing, queues), без геймплея  
 - `logic/` — симуляция, без SFML Network / wire protobuf  
 - `ServerEngine` — серверный loop (tick + broadcast)  
+- `runServerSmoke` — интеграционный self-test сервера (отдельно от loop)  
 - `ClientApp` — клиентский loop (input + net + scene)
