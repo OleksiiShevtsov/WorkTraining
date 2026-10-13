@@ -1,6 +1,6 @@
 project(app)
 
-# Client UI: SFML window, keyboard input, scene rendering.
+# Client UI + ClientApp runtime (window, input, scene, TcpClient loop).
 
 file(GLOB app_SRC CONFIGURE_DEPENDS
     "src/*.cpp"
@@ -16,6 +16,8 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         common
+        net
+        proto_messages
         sfml-graphics
         sfml-window
         sfml-system

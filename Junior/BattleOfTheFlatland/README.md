@@ -115,16 +115,16 @@ BattleOfTheFlatland/
 ├── common/
 │   ├── sources/include/common/
 │   └── protobuf/messages/
-├── net/
+├── net/                 # TcpServer, TcpClient, framing, queues
 ├── server/
-│   └── logic/
+│   ├── engine/          # ServerEngine (tick loop)
+│   └── logic/           # GameLogic / DynamicObject
 ├── client/
-│   └── app/
+│   └── app/             # ClientApp + AppRendering / InputHandler
 └── tests/
 ```
 
-Сервер: `botf_server` — loop 20 Hz; после каждого `tick` broadcast `WorldState`.  
-Клиент: WASD → `Move`; рисует `SceneObject` из последнего `WorldState`.
+`main` тонкий: `ServerEngine` / `ClientApp`.
 
 ```
 Move (client → server) → GameLogic.tick → WorldState (server → clients) → draw
@@ -134,3 +134,4 @@ Move (client → server) → GameLogic.tick → WorldState (server → clients) 
 botf_server --smoke
 botf_client --smoke
 ```
+

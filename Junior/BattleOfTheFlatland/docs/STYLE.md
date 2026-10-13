@@ -20,6 +20,7 @@
 
 ## Слои (ориентир)
 
-- `net/` — транспорт (байты, framing, TCP), без геймплея  
+- `net/` — транспорт (`TcpServer` / `TcpClient`, framing, queues), без геймплея  
 - `logic/` — симуляция, без SFML Network / wire protobuf  
-- `client/app`, `server` glue — сборка цикла; дальше выносится в App-классы (см. Foundation 23–26)
+- `ServerEngine` — серверный loop (tick + broadcast)  
+- `ClientApp` — клиентский loop (input + net + scene)

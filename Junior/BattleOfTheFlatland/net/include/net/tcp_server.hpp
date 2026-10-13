@@ -1,7 +1,6 @@
 #pragma once
 
-#include "net/notification_queue.hpp"
-#include "net/types.hpp"
+#include "net/queues.hpp"
 
 #include <cstdint>
 #include <memory>
@@ -11,9 +10,6 @@
 #include <SFML/Network.hpp>
 
 namespace botf::net {
-
-using InboundQueue = NotificationQueue<InboundNotification>;
-using OutboundQueue = NotificationQueue<OutboundNotification>;
 
 // SFML TCP server: accepts clients, fills inbound queue, drains outbound queue.
 class TcpServer {

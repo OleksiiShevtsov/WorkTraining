@@ -1,5 +1,6 @@
 # Server-side game rules (not linked by client).
 add_subdirectory(logic)
+add_subdirectory(engine)
 
 add_executable(botf_server
     main.cpp
@@ -7,8 +8,5 @@ add_executable(botf_server
 
 target_link_libraries(botf_server
     PRIVATE
-        logic
-        net
-        common
-        proto_messages
+        server_engine
 )

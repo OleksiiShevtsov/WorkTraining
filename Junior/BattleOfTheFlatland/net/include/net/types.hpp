@@ -21,4 +21,9 @@ struct OutboundNotification {
   std::string payload;
 };
 
+// Server → this client (TcpClient inbound). No session id needed.
+struct ClientInboundNotification {
+  std::string payload;
+};
+
 }  // namespace botf::net
