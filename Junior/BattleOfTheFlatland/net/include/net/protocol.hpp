@@ -2,9 +2,11 @@
 
 #include "envelope.pb.h"
 #include "move.pb.h"
+#include "world_state.pb.h"
 
 #include <algorithm>
 #include <cstdint>
+#include <optional>
 #include <string>
 
 namespace botf::net {
@@ -62,6 +64,32 @@ inline std::string make_move_envelope(int dx, int dy, std::uint32_t tick, std::u
   envelope.set_sequence(sequence);
   envelope.set_payload(move.SerializeAsString());
   return envelope.SerializeAsString();
+}
+
+// Serialized Envelope(MESSAGE_TYPE_WORLD_STATE) bytes (without length prefix).
+inline std::string make_world_state_envelope(const botf::WorldState& state,
+                                             std::uint64_t sequence) {
+  botf::Envelope envelope;
+  envelope.set_type(botf::MESSAGE_TYPE_WORLD_STATE);
+  envelope.set_sequence(sequence);
+  envelope.set_payload(state.SerializeAsString());
+  return envelope.SerializeAsString();
+}
+
+inline std::optional<botf::Envelope> parse_envelope(const std::string& bytes) {
+  botf::Envelope envelope;
+  if (!envelope.ParseFromString(bytes)) {
+    return std::nullopt;
+  }
+  return envelope;
+}
+
+inline std::optional<botf::WorldState> parse_world_state_payload(const std::string& payload) {
+  botf::WorldState state;
+  if (!state.ParseFromString(payload)) {
+    return std::nullopt;
+  }
+  return state;
 }
 
 }  // namespace botf::net

@@ -118,4 +118,5 @@ BattleOfTheFlatland/
 └── tests/
 ```
 
-Сервер: `botf_server` — loop 20 Hz; `botf_server --smoke` — самопроверка.
+Сервер: `botf_server` — loop 20 Hz; после каждого `tick` broadcast `WorldState`.  
+`botf_server --smoke` — Move + GameLogic + приём WorldState.

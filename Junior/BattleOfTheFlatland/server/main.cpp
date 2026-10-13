@@ -6,7 +6,9 @@
 #include "net/packet_framing.hpp"
 #include "net/protocol.hpp"
 #include "net/tcp_server.hpp"
+#include "world_state.pb.h"
 
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <csignal>
@@ -15,6 +17,7 @@
 #include <iostream>
 #include <thread>
 #include <unordered_map>
+#include <vector>
 
 #include <SFML/Network.hpp>
 
@@ -59,6 +62,31 @@ void ensure_client_bound(GameLogic& game, ClientId client_id) {
   game.bind_client(client_id, entity);
 }
 
+WorldState build_world_state(const GameLogic& game, std::uint32_t tick) {
+  WorldState state;
+  state.set_tick(tick);
+  for (const auto& obj : game.objects()) {
+    PlayerState* player = state.add_players();
+    player->set_id(obj.id());
+    auto* position = player->mutable_position();
+    position->set_x(obj.position().x);
+    position->set_y(obj.position().y);
+    player->set_aim_angle(obj.angle());
+  }
+  return state;
+}
+
+void enqueue_world_state(net::OutboundQueue& outbound,
+                         const GameLogic& game,
+                         std::uint32_t tick,
+                         std::uint64_t sequence) {
+  // Broadcast: client_id == nullopt → every connected client.
+  outbound.push(net::OutboundNotification{
+      std::nullopt,
+      net::make_world_state_envelope(build_world_state(game, tick), sequence),
+  });
+}
+
 void apply_inbound_move(net::InboundQueue& inbound,
                         std::unordered_map<ClientId, ClientInputState>& states,
                         GameLogic& game,
@@ -98,8 +126,34 @@ void apply_inbound_move(net::InboundQueue& inbound,
   }
 }
 
+bool recv_one_frame(sf::TcpSocket& socket,
+                    std::vector<std::uint8_t>& buffer,
+                    std::string& out_payload,
+                    int attempts) {
+  for (int i = 0; i < attempts; ++i) {
+    if (auto payload = net::try_consume_frame(buffer)) {
+      out_payload = std::move(*payload);
+      return true;
+    }
+
+    std::array<char, 4096> chunk{};
+    std::size_t received = 0;
+    const auto status = socket.receive(chunk.data(), chunk.size(), received);
+    if (status == sf::Socket::Status::Done && received > 0) {
+      buffer.insert(buffer.end(), chunk.data(), chunk.data() + received);
+      continue;
+    }
+    if (status == sf::Socket::Status::Disconnected || status == sf::Socket::Status::Error) {
+      return false;
+    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+  }
+  return false;
+}
+
 int run_smoke(net::TcpServer& server,
               net::InboundQueue& inbound,
+              net::OutboundQueue& outbound,
               std::unordered_map<ClientId, ClientInputState>& states,
               GameLogic& game) {
   sf::TcpSocket client;
@@ -123,6 +177,8 @@ int run_smoke(net::TcpServer& server,
   };
 
   const auto start = game.objects().front().position();
+  std::uint32_t sim_tick = 0;
+  std::vector<std::uint8_t> recv_buffer;
 
   // Hold each Move state for several sim ticks (matches real client cadence).
   for (const auto& sample : samples) {
@@ -148,7 +204,44 @@ int run_smoke(net::TcpServer& server,
 
     for (int j = 0; j < 15; ++j) {
       game.tick(kDt);
+      ++sim_tick;
+      enqueue_world_state(outbound, game, sim_tick, sim_tick);
+      server.poll();
     }
+  }
+
+  // Final snapshot, then drain every WorldState and keep the last (authoritative end pos).
+  enqueue_world_state(outbound, game, sim_tick, sim_tick);
+  for (int i = 0; i < 20; ++i) {
+    server.poll();
+    std::this_thread::sleep_for(std::chrono::milliseconds(2));
+  }
+
+  // Non-blocking drain — blocking receive would hang once the queue is empty.
+  client.setBlocking(false);
+
+  WorldState last_state;
+  bool got_world = false;
+  for (int i = 0; i < 500; ++i) {
+    server.poll();
+    std::string payload;
+    if (!recv_one_frame(client, recv_buffer, payload, 1)) {
+      if (got_world && i > 50) {
+        break;
+      }
+      std::this_thread::sleep_for(std::chrono::milliseconds(2));
+      continue;
+    }
+    auto envelope = net::parse_envelope(payload);
+    if (!envelope || envelope->type() != MESSAGE_TYPE_WORLD_STATE) {
+      continue;
+    }
+    auto state = net::parse_world_state_payload(envelope->payload());
+    if (!state || state->players_size() == 0) {
+      continue;
+    }
+    last_state = std::move(*state);
+    got_world = true;
   }
 
   client.disconnect();
@@ -167,17 +260,36 @@ int run_smoke(net::TcpServer& server,
     return 1;
   }
 
-  std::cout << "BattleOfTheFlatland server — smoke ok (Move + GameLogic)\n";
+  if (!got_world) {
+    std::cerr << "[server] smoke failed: no WorldState received by client\n";
+    return 1;
+  }
+
+  const auto& p0 = last_state.players(0);
+  const float dx = p0.position().x() - end.x;
+  const float dy = p0.position().y() - end.y;
+  if (dx * dx + dy * dy > 0.01f) {
+    std::cerr << "[server] smoke failed: WorldState pos mismatch " << "wire=(" << p0.position().x()
+              << "," << p0.position().y() << ") " << "logic=(" << end.x << "," << end.y << ")\n";
+    return 1;
+  }
+
+  std::cout << "[server] WorldState ok tick=" << last_state.tick()
+            << " players=" << last_state.players_size() << " p0=(" << p0.position().x() << ","
+            << p0.position().y() << ")\n";
+  std::cout << "BattleOfTheFlatland server — smoke ok (Move + GameLogic + WorldState)\n";
   return 0;
 }
 
 int run_loop(net::TcpServer& server,
              net::InboundQueue& inbound,
+             net::OutboundQueue& outbound,
              std::unordered_map<ClientId, ClientInputState>& states,
              GameLogic& game) {
   std::cout << "[server] running on port " << kPort << " at " << kTickHz
             << " Hz (Ctrl+C to stop)\n";
-  std::cout << "[server] Move → GameLogic.set_client_input → tick(" << kDt << ")\n";
+  std::cout << "[server] Move → GameLogic.set_client_input → tick(" << kDt
+            << ") → WorldState broadcast\n";
 
   std::uint64_t server_tick = 0;
   while (g_running) {
@@ -186,8 +298,10 @@ int run_loop(net::TcpServer& server,
     server.poll();
     apply_inbound_move(inbound, states, game, true);
     game.tick(kDt);
-
     ++server_tick;
+    enqueue_world_state(outbound, game, static_cast<std::uint32_t>(server_tick), server_tick);
+    server.poll();
+
     if (server_tick % static_cast<std::uint64_t>(kTickHz) == 0) {
       const auto& objects = game.objects();
       std::cout << "[server] heartbeat tick=" << server_tick << " clients=" << server.client_count()
@@ -245,8 +359,8 @@ int run_server(int argc, char** argv) {
     return 1;
   }
 
-  const int code = smoke ? run_smoke(server, inbound, input_states, game)
-                         : run_loop(server, inbound, input_states, game);
+  const int code = smoke ? run_smoke(server, inbound, outbound, input_states, game)
+                         : run_loop(server, inbound, outbound, input_states, game);
 
   server.stop();
   return code;
