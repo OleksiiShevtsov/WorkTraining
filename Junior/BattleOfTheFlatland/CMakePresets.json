@@ -9,15 +9,5 @@
       "name": "release",
       "binaryDir": "$env{CMAKE_BUILDS_ROOT}/${sourceDirName}/release"
     }
-  ],
-  "buildPresets": [
-    {
-      "name": "debug",
-      "configurePreset": "debug"
-    },
-    {
-      "name": "release",
-      "configurePreset": "release"
-    }
   ]
 }
