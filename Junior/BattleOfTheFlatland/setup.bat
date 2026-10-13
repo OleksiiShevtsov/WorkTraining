@@ -37,7 +37,9 @@ for %%I in ("%LIB_DIR%\..") do set "PARENT_DIR=%%~fI"
 set "BUILD_DIR=%PARENT_DIR%\BUILD"
 if defined CMAKE_BUILDS_ROOT set "BUILD_DIR=%CMAKE_BUILDS_ROOT%"
 
-set "PROTO_FRESH=0"
+rem Pin: matches typical system protobuf 3.21.x; avoids bleeding-edge main + heavy deps.
+set "PROTOBUF_TAG=v21.12"
+set "PROTOBUF_URL=https://github.com/protocolbuffers/protobuf.git"
 
 echo [botf] LIB directory:   %LIB_DIR%
 echo [botf] BUILD directory: %BUILD_DIR%
@@ -52,29 +54,13 @@ if errorlevel 1 goto :fail
 call :ensure_dep googletest "https://github.com/google/googletest.git"
 if errorlevel 1 goto :fail
 
-if exist "protobuf\" (
-  echo [botf] protobuf already present — skip clone
-) else (
-  echo [botf] Cloning protobuf into %LIB_DIR%\protobuf ...
-  git clone --depth 1 https://github.com/protocolbuffers/protobuf.git
-  if errorlevel 1 goto :fail
-  set "PROTO_FRESH=1"
-)
-
-if "%PROTO_FRESH%"=="1" (
-  echo [botf] Initializing protobuf submodules...
-  pushd protobuf
-  git submodule update --init --recursive
-  if errorlevel 1 (
-    popd
-    goto :fail
-  )
-  popd
-)
+call :ensure_protobuf
+if errorlevel 1 goto :fail
 
 popd
 echo [botf] Done.
 echo [botf] LIB=%LIB_DIR%
+echo [botf] protobuf=%LIB_DIR%\protobuf  (tag %PROTOBUF_TAG%)
 if defined CMAKE_BUILDS_ROOT (
   echo [botf] CMAKE_BUILDS_ROOT=%CMAKE_BUILDS_ROOT%
   echo [botf] Use preset: cmake --preset debug
@@ -120,3 +106,43 @@ if /I "%DEP_NAME%"=="SFML" (
 echo [botf] Cloning %DEP_NAME% into %LIB_DIR%\%DEP_NAME% ...
 git clone --depth 1 "%DEP_URL%" "%DEP_NAME%"
 exit /b %ERRORLEVEL%
+
+:ensure_protobuf
+rem Incomplete tree (interrupted clone) → remove and re-clone.
+if exist "protobuf\" if not exist "protobuf\CMakeLists.txt" (
+  echo [botf] protobuf looks incomplete — removing and re-cloning
+  rmdir /s /q "protobuf" 2>nul
+)
+
+if exist "protobuf\CMakeLists.txt" (
+  echo [botf] protobuf already present in %LIB_DIR%\protobuf — skip clone
+) else (
+  if exist "protobuf\" (
+    echo [botf] protobuf folder unusable — removing
+    rmdir /s /q "protobuf" 2>nul
+  )
+  echo [botf] Cloning protobuf %PROTOBUF_TAG% into %LIB_DIR%\protobuf ...
+  git clone --depth 1 --branch "%PROTOBUF_TAG%" "%PROTOBUF_URL%" protobuf
+  if errorlevel 1 exit /b 1
+)
+
+rem Submodules: run when missing (not only on first clone).
+if not exist "protobuf\third_party\googletest\CMakeLists.txt" (
+  echo [botf] Initializing protobuf submodules...
+  pushd protobuf
+  git submodule update --init --recursive
+  if errorlevel 1 (
+    popd
+    exit /b 1
+  )
+  popd
+) else (
+  echo [botf] protobuf submodules look present — skip submodule update
+)
+
+if not exist "protobuf\CMakeLists.txt" (
+  echo [botf] ERROR: protobuf CMakeLists.txt missing after setup
+  exit /b 1
+)
+echo [botf] protobuf ready: %LIB_DIR%\protobuf
+exit /b 0

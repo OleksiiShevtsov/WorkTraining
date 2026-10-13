@@ -51,7 +51,8 @@ setup.bat
 ```
 
 Ищет `LIB` рядом с `WorkTraining` (или `BOTF_LIB_ROOT`).  
-Если SFML уже есть — **не клонирует**.
+Если SFML / googletest / protobuf уже есть — **не клонирует**.  
+Protobuf: тег `v21.12` в `%LIB%\protobuf` (битую папку без `CMakeLists.txt` переклонирует).
 
 ## Build
 
