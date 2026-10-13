@@ -55,6 +55,11 @@ setup.bat
 Protobuf: тег `v21.12` в `%LIB%\protobuf` (битую папку без `CMakeLists.txt` переклонирует).  
 CMake на Windows/LIB собирает protobuf из исходников (`protobuf_BUILD_TESTS=OFF`), без системного `find_package`.
 
+## Style
+
+Члены класса: `m_name` (не `name_`). Константы: `kName`.  
+Подробнее: [`docs/STYLE.md`](docs/STYLE.md).
+
 ## Format
 
 В корне лежит `.clang-format` (стиль Google, 2 пробела, колонка 100).  

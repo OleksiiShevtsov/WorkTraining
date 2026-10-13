@@ -6,85 +6,85 @@ namespace botf::app {
 
 AppRendering::AppRendering()
 #if SFML_VERSION_MAJOR >= 3
-    : window_{std::make_shared<sf::RenderWindow>(
+    : m_window{std::make_shared<sf::RenderWindow>(
           sf::VideoMode({static_cast<unsigned int>(common::GlobalSettings::sizeWindowX),
                          static_cast<unsigned int>(common::GlobalSettings::sizeWindowY)}),
           "Battle Of The Flatland")} {
 #else
-    : window_{std::make_shared<sf::RenderWindow>(
+    : m_window{std::make_shared<sf::RenderWindow>(
           sf::VideoMode(static_cast<unsigned int>(common::GlobalSettings::sizeWindowX),
                         static_cast<unsigned int>(common::GlobalSettings::sizeWindowY)),
           "Battle Of The Flatland")} {
 #endif
-  window_->setFramerateLimit(60);
+  m_window->setFramerateLimit(60);
 }
 
 Player& AppRendering::player() {
-  return player_;
+  return m_player;
 }
 
 const Player& AppRendering::player() const {
-  return player_;
+  return m_player;
 }
 
 InputHandler& AppRendering::input_handler() {
-  return input_handler_;
+  return m_input_handler;
 }
 
 const InputHandler& AppRendering::input_handler() const {
-  return input_handler_;
+  return m_input_handler;
 }
 
 void AppRendering::clear_scene() {
-  scene_.clear();
+  m_scene.clear();
 }
 
 void AppRendering::set_scene_object(common::ID id, common::Point position, common::Angle angle) {
-  for (auto& obj : scene_) {
+  for (auto& obj : m_scene) {
     if (obj.id == id) {
       obj.position = position;
       obj.angle = angle;
       return;
     }
   }
-  scene_.push_back(SceneObject{id, position, angle});
+  m_scene.push_back(SceneObject{id, position, angle});
 }
 
 void AppRendering::set_scene(std::vector<SceneObject> objects) {
-  scene_ = std::move(objects);
+  m_scene = std::move(objects);
 }
 
 bool AppRendering::is_window_open() const {
-  return window_ && window_->isOpen();
+  return m_window && m_window->isOpen();
 }
 
 void AppRendering::draw() {
-  if (!window_) {
+  if (!m_window) {
     return;
   }
 
 #if SFML_VERSION_MAJOR >= 3
-  while (const std::optional event = window_->pollEvent()) {
+  while (const std::optional event = m_window->pollEvent()) {
     if (event->is<sf::Event::Closed>()) {
-      window_->close();
+      m_window->close();
     }
   }
 #else
   sf::Event event{};
-  while (window_->pollEvent(event)) {
+  while (m_window->pollEvent(event)) {
     if (event.type == sf::Event::Closed) {
-      window_->close();
+      m_window->close();
     }
   }
 #endif
 
-  window_->clear(sf::Color(25, 25, 25));
+  m_window->clear(sf::Color(25, 25, 25));
   draw_map();
   draw_scene_objects();
-  window_->display();
+  m_window->display();
 
   // Fresh scene each frame; caller fills from WorldState before draw().
-  scene_.clear();
+  m_scene.clear();
 }
 
 void AppRendering::draw_map() {
@@ -92,7 +92,7 @@ void AppRendering::draw_map() {
 }
 
 void AppRendering::draw_scene_objects() {
-  for (const auto& el : scene_) {
+  for (const auto& el : m_scene) {
     sf::CircleShape circle(10.f);
     circle.setFillColor(sf::Color(120, 20, 20));
 #if SFML_VERSION_MAJOR >= 3
@@ -102,7 +102,7 @@ void AppRendering::draw_scene_objects() {
     circle.setOrigin(10.f, 10.f);
     circle.setPosition(el.position.x, el.position.y);
 #endif
-    window_->draw(circle);
+    m_window->draw(circle);
   }
 }
 

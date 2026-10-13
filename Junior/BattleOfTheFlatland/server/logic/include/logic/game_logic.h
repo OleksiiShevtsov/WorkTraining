@@ -38,9 +38,9 @@ class GameLogic {
  private:
   DynamicObject* find_mutable(common::ID entity_id);
 
-  std::vector<DynamicObject> objects_;
-  std::unordered_map<ClientId, common::ID> client_to_entity_;
-  common::ID next_entity_id_{1};
+  std::vector<DynamicObject> m_objects;
+  std::unordered_map<ClientId, common::ID> m_client_to_entity;
+  common::ID m_next_entity_id{1};
 };
 
 }  // namespace botf

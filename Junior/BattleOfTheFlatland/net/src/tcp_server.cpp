@@ -16,7 +16,7 @@ void append_bytes(std::vector<std::uint8_t>& dst, const std::vector<std::uint8_t
 }  // namespace
 
 TcpServer::TcpServer(InboundQueue& inbound, OutboundQueue& outbound)
-    : inbound_(inbound), outbound_(outbound) {}
+    : m_inbound(inbound), m_outbound(outbound) {}
 
 TcpServer::~TcpServer() {
   stop();
@@ -25,45 +25,45 @@ TcpServer::~TcpServer() {
 bool TcpServer::listen(std::uint16_t port) {
   stop();
 
-  listener_.setBlocking(false);
-  if (listener_.listen(port) != sf::Socket::Status::Done) {
+  m_listener.setBlocking(false);
+  if (m_listener.listen(port) != sf::Socket::Status::Done) {
     std::cerr << "[net] failed to listen on port " << port << '\n';
     return false;
   }
 
-  selector_.add(listener_);
-  port_ = port;
-  listening_ = true;
-  std::cout << "[net] listening on port " << port_ << '\n';
+  m_selector.add(m_listener);
+  m_port = port;
+  m_listening = true;
+  std::cout << "[net] listening on port " << m_port << '\n';
   return true;
 }
 
 void TcpServer::stop() {
-  if (!listening_ && clients_.empty()) {
+  if (!m_listening && m_clients.empty()) {
     return;
   }
 
-  for (auto& [id, client] : clients_) {
+  for (auto& [id, client] : m_clients) {
     (void)id;
-    selector_.remove(*client.socket);
+    m_selector.remove(*client.socket);
     client.socket->disconnect();
   }
-  clients_.clear();
+  m_clients.clear();
 
-  selector_.remove(listener_);
-  listener_.close();
-  listening_ = false;
-  port_ = 0;
+  m_selector.remove(m_listener);
+  m_listener.close();
+  m_listening = false;
+  m_port = 0;
 }
 
 void TcpServer::poll() {
-  if (!listening_) {
+  if (!m_listening) {
     return;
   }
 
   dispatch_outbound();
 
-  if (selector_.wait(sf::milliseconds(1))) {
+  if (m_selector.wait(sf::milliseconds(1))) {
     accept_new_clients();
     receive_from_clients();
   }
@@ -72,32 +72,32 @@ void TcpServer::poll() {
 }
 
 void TcpServer::accept_new_clients() {
-  if (!selector_.isReady(listener_)) {
+  if (!m_selector.isReady(m_listener)) {
     return;
   }
 
   auto socket = std::make_unique<sf::TcpSocket>();
-  if (listener_.accept(*socket) != sf::Socket::Status::Done) {
+  if (m_listener.accept(*socket) != sf::Socket::Status::Done) {
     return;
   }
 
   socket->setBlocking(false);
-  const botf::ClientId id = next_client_id_++;
-  selector_.add(*socket);
+  const botf::ClientId id = m_next_client_id++;
+  m_selector.add(*socket);
 
   Client client;
   client.id = id;
   client.socket = std::move(socket);
-  clients_.emplace(id, std::move(client));
+  m_clients.emplace(id, std::move(client));
 
-  std::cout << "[net] client connected id=" << id << " (total " << clients_.size() << ")\n";
+  std::cout << "[net] client connected id=" << id << " (total " << m_clients.size() << ")\n";
 }
 
 void TcpServer::receive_from_clients() {
   std::vector<botf::ClientId> to_drop;
 
-  for (auto& [id, client] : clients_) {
-    if (!selector_.isReady(*client.socket)) {
+  for (auto& [id, client] : m_clients) {
+    if (!m_selector.isReady(*client.socket)) {
       continue;
     }
 
@@ -116,7 +116,7 @@ void TcpServer::receive_from_clients() {
     client.recv_buffer.insert(client.recv_buffer.end(), chunk.data(), chunk.data() + received);
 
     while (auto payload = try_consume_frame(client.recv_buffer)) {
-      inbound_.push(InboundNotification{id, std::move(*payload)});
+      m_inbound.push(InboundNotification{id, std::move(*payload)});
     }
   }
 
@@ -126,19 +126,19 @@ void TcpServer::receive_from_clients() {
 }
 
 void TcpServer::dispatch_outbound() {
-  while (auto note = outbound_.try_pop()) {
+  while (auto note = m_outbound.try_pop()) {
     const auto framed = frame_payload(note->payload);
 
     if (!note->client_id.has_value()) {
-      for (auto& [id, client] : clients_) {
+      for (auto& [id, client] : m_clients) {
         (void)id;
         append_bytes(client.send_buffer, framed);
       }
       continue;
     }
 
-    const auto it = clients_.find(*note->client_id);
-    if (it == clients_.end()) {
+    const auto it = m_clients.find(*note->client_id);
+    if (it == m_clients.end()) {
       continue;
     }
     append_bytes(it->second.send_buffer, framed);
@@ -148,7 +148,7 @@ void TcpServer::dispatch_outbound() {
 void TcpServer::flush_send_buffers() {
   std::vector<botf::ClientId> to_drop;
 
-  for (auto& [id, client] : clients_) {
+  for (auto& [id, client] : m_clients) {
     while (!client.send_buffer.empty()) {
       std::size_t sent = 0;
       const auto status =
@@ -159,7 +159,7 @@ void TcpServer::flush_send_buffers() {
         break;
       }
 
-      if (sent > 0) {   
+      if (sent > 0) {
         client.send_buffer.erase(client.send_buffer.begin(),
                                  client.send_buffer.begin() + static_cast<std::ptrdiff_t>(sent));
       }
@@ -179,15 +179,15 @@ void TcpServer::flush_send_buffers() {
 }
 
 void TcpServer::drop_client(botf::ClientId id) {
-  const auto it = clients_.find(id);
-  if (it == clients_.end()) {
+  const auto it = m_clients.find(id);
+  if (it == m_clients.end()) {
     return;
   }
 
-  selector_.remove(*it->second.socket);
+  m_selector.remove(*it->second.socket);
   it->second.socket->disconnect();
-  clients_.erase(it);
-  std::cout << "[net] client disconnected id=" << id << " (total " << clients_.size() << ")\n";
+  m_clients.erase(it);
+  std::cout << "[net] client disconnected id=" << id << " (total " << m_clients.size() << ")\n";
 }
 
 }  // namespace botf::net

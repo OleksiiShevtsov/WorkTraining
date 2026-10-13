@@ -35,10 +35,10 @@ class AppRendering {
   void draw_map();
   void draw_scene_objects();
 
-  Player player_{};
-  InputHandler input_handler_{};
-  std::vector<SceneObject> scene_;
-  std::shared_ptr<sf::RenderWindow> window_;
+  Player m_player{};
+  InputHandler m_input_handler{};
+  std::vector<SceneObject> m_scene;
+  std::shared_ptr<sf::RenderWindow> m_window;
 };
 
 }  // namespace botf::app

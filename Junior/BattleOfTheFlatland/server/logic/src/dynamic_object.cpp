@@ -13,82 +13,82 @@ int clamp_axis(int value) {
 }  // namespace
 
 DynamicObject::DynamicObject(common::ID id, common::Point dot, float speed_limit)
-    : id_{id}, position_{dot}, angle_{0.0f}, speed_limit_{speed_limit} {
-  movement_.initial_x = position_.x;
-  movement_.initial_y = position_.y;
+    : m_id{id}, m_position{dot}, m_angle{0.0f}, m_speed_limit{speed_limit} {
+  m_movement.initial_x = m_position.x;
+  m_movement.initial_y = m_position.y;
 }
 
 common::ID DynamicObject::id() const {
-  return id_;
+  return m_id;
 }
 
 common::Point DynamicObject::position() const {
-  return position_;
+  return m_position;
 }
 
 common::Angle DynamicObject::angle() const {
-  return angle_;
+  return m_angle;
 }
 
 int DynamicObject::input_dx() const {
-  return input_dx_;
+  return m_input_dx;
 }
 
 int DynamicObject::input_dy() const {
-  return input_dy_;
+  return m_input_dy;
 }
 
 void DynamicObject::set_position(common::Point dot) {
-  position_ = dot;
+  m_position = dot;
 }
 
 void DynamicObject::set_angle(common::Angle alpha) {
-  angle_ = alpha;
+  m_angle = alpha;
 }
 
 void DynamicObject::set_input(int dx, int dy) {
-  input_dx_ = clamp_axis(dx);
-  input_dy_ = clamp_axis(dy);
+  m_input_dx = clamp_axis(dx);
+  m_input_dy = clamp_axis(dy);
 }
 
 float DynamicObject::speed_recalculation(float acceleration, float initial_speed) const {
-  float speed = acceleration * movement_.current_time + initial_speed;
-  if (speed_limit_ > 0.0f) {
-    speed = std::clamp(speed, -speed_limit_, speed_limit_);
+  float speed = acceleration * m_movement.current_time + initial_speed;
+  if (m_speed_limit > 0.0f) {
+    speed = std::clamp(speed, -m_speed_limit, m_speed_limit);
   }
   return speed;
 }
 
 common::Coordinate DynamicObject::coordinate_recalculation(
     float acceleration, float initial_speed, common::Coordinate initial_coordinate) const {
-  return acceleration * movement_.current_time * movement_.current_time / 2.0f +
-         initial_speed * movement_.current_time + initial_coordinate;
+  return acceleration * m_movement.current_time * m_movement.current_time / 2.0f +
+         initial_speed * m_movement.current_time + initial_coordinate;
 }
 
 void DynamicObject::reset_endpoints() {
   const float speed_mag =
-      std::sqrt(movement_.speed_x * movement_.speed_x + movement_.speed_y * movement_.speed_y);
+      std::sqrt(m_movement.speed_x * m_movement.speed_x + m_movement.speed_y * m_movement.speed_y);
   if (speed_mag > kSpeedEpsilon) {
-    movement_.cos_acceleration = movement_.speed_x / speed_mag;
-    movement_.sin_acceleration = movement_.speed_y / speed_mag;
+    m_movement.cos_acceleration = m_movement.speed_x / speed_mag;
+    m_movement.sin_acceleration = m_movement.speed_y / speed_mag;
   } else {
     // No velocity yet — friction direction follows current input if any.
-    if (input_dx_ != 0 || input_dy_ != 0) {
+    if (m_input_dx != 0 || m_input_dy != 0) {
       const float input_mag =
-          std::sqrt(static_cast<float>(input_dx_ * input_dx_ + input_dy_ * input_dy_));
-      movement_.cos_acceleration = static_cast<float>(input_dx_) / input_mag;
-      movement_.sin_acceleration = static_cast<float>(-input_dy_) / input_mag;  // +dy = up => -y
+          std::sqrt(static_cast<float>(m_input_dx * m_input_dx + m_input_dy * m_input_dy));
+      m_movement.cos_acceleration = static_cast<float>(m_input_dx) / input_mag;
+      m_movement.sin_acceleration = static_cast<float>(-m_input_dy) / input_mag;  // +dy = up => -y
     } else {
-      movement_.cos_acceleration = 0.0f;
-      movement_.sin_acceleration = 0.0f;
+      m_movement.cos_acceleration = 0.0f;
+      m_movement.sin_acceleration = 0.0f;
     }
   }
 
-  movement_.initial_speed_x = movement_.speed_x;
-  movement_.initial_speed_y = movement_.speed_y;
-  movement_.initial_x = position_.x;
-  movement_.initial_y = position_.y;
-  movement_.current_time = 0.0f;
+  m_movement.initial_speed_x = m_movement.speed_x;
+  m_movement.initial_speed_y = m_movement.speed_y;
+  m_movement.initial_x = m_position.x;
+  m_movement.initial_y = m_position.y;
+  m_movement.current_time = 0.0f;
 }
 
 void DynamicObject::update(float dt) {
@@ -96,56 +96,56 @@ void DynamicObject::update(float dt) {
     return;
   }
 
-  if (input_dx_ != prev_input_dx_ || input_dy_ != prev_input_dy_) {
+  if (m_input_dx != m_prev_input_dx || m_input_dy != m_prev_input_dy) {
     reset_endpoints();
-    prev_input_dx_ = input_dx_;
-    prev_input_dy_ = input_dy_;
+    m_prev_input_dx = m_input_dx;
+    m_prev_input_dy = m_input_dy;
   }
 
-  movement_.current_time += dt;
+  m_movement.current_time += dt;
 
-  const bool idle = (input_dx_ == 0 && input_dy_ == 0);
+  const bool idle = (m_input_dx == 0 && m_input_dy == 0);
 
   if (idle) {
     // FREE: only friction on axes that still move.
-    if (std::fabs(movement_.speed_x) > kSpeedEpsilon) {
-      movement_.speed_x =
-          speed_recalculation(kFriction * movement_.cos_acceleration, movement_.initial_speed_x);
-      position_.x = coordinate_recalculation(kFriction * movement_.cos_acceleration,
-                                             movement_.initial_speed_x, movement_.initial_x);
+    if (std::fabs(m_movement.speed_x) > kSpeedEpsilon) {
+      m_movement.speed_x =
+          speed_recalculation(kFriction * m_movement.cos_acceleration, m_movement.initial_speed_x);
+      m_position.x = coordinate_recalculation(kFriction * m_movement.cos_acceleration,
+                                              m_movement.initial_speed_x, m_movement.initial_x);
     }
-    if (std::fabs(movement_.speed_y) > kSpeedEpsilon) {
-      movement_.speed_y =
-          speed_recalculation(kFriction * movement_.sin_acceleration, movement_.initial_speed_y);
-      position_.y = coordinate_recalculation(kFriction * movement_.sin_acceleration,
-                                             movement_.initial_speed_y, movement_.initial_y);
+    if (std::fabs(m_movement.speed_y) > kSpeedEpsilon) {
+      m_movement.speed_y =
+          speed_recalculation(kFriction * m_movement.sin_acceleration, m_movement.initial_speed_y);
+      m_position.y = coordinate_recalculation(kFriction * m_movement.sin_acceleration,
+                                              m_movement.initial_speed_y, m_movement.initial_y);
     }
     return;
   }
 
   // Active input: accelerate on pressed axes (dy=+1 is up → negative screen/game y).
   // Perpendicular residual speed gets friction (old LEFT/RIGHT/UP/DOWN side-effect).
-  if (input_dx_ != 0) {
-    const float ax = static_cast<float>(input_dx_) * kAcceleration;
-    movement_.speed_x = speed_recalculation(ax, movement_.initial_speed_x);
-    position_.x = coordinate_recalculation(ax, movement_.initial_speed_x, movement_.initial_x);
-  } else if (std::fabs(movement_.speed_x) > kSpeedEpsilon) {
+  if (m_input_dx != 0) {
+    const float ax = static_cast<float>(m_input_dx) * kAcceleration;
+    m_movement.speed_x = speed_recalculation(ax, m_movement.initial_speed_x);
+    m_position.x = coordinate_recalculation(ax, m_movement.initial_speed_x, m_movement.initial_x);
+  } else if (std::fabs(m_movement.speed_x) > kSpeedEpsilon) {
     // Fixed UP-branch bug: friction on X uses speed_x threshold (not speed_y).
-    movement_.speed_x =
-        speed_recalculation(kFriction * movement_.cos_acceleration, movement_.initial_speed_x);
-    position_.x = coordinate_recalculation(kFriction * movement_.cos_acceleration,
-                                           movement_.initial_speed_x, movement_.initial_x);
+    m_movement.speed_x =
+        speed_recalculation(kFriction * m_movement.cos_acceleration, m_movement.initial_speed_x);
+    m_position.x = coordinate_recalculation(kFriction * m_movement.cos_acceleration,
+                                            m_movement.initial_speed_x, m_movement.initial_x);
   }
 
-  if (input_dy_ != 0) {
-    const float ay = static_cast<float>(-input_dy_) * kAcceleration;
-    movement_.speed_y = speed_recalculation(ay, movement_.initial_speed_y);
-    position_.y = coordinate_recalculation(ay, movement_.initial_speed_y, movement_.initial_y);
-  } else if (std::fabs(movement_.speed_y) > kSpeedEpsilon) {
-    movement_.speed_y =
-        speed_recalculation(kFriction * movement_.sin_acceleration, movement_.initial_speed_y);
-    position_.y = coordinate_recalculation(kFriction * movement_.sin_acceleration,
-                                           movement_.initial_speed_y, movement_.initial_y);
+  if (m_input_dy != 0) {
+    const float ay = static_cast<float>(-m_input_dy) * kAcceleration;
+    m_movement.speed_y = speed_recalculation(ay, m_movement.initial_speed_y);
+    m_position.y = coordinate_recalculation(ay, m_movement.initial_speed_y, m_movement.initial_y);
+  } else if (std::fabs(m_movement.speed_y) > kSpeedEpsilon) {
+    m_movement.speed_y =
+        speed_recalculation(kFriction * m_movement.sin_acceleration, m_movement.initial_speed_y);
+    m_position.y = coordinate_recalculation(kFriction * m_movement.sin_acceleration,
+                                            m_movement.initial_speed_y, m_movement.initial_y);
   }
 }
 

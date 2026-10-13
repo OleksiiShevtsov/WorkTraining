@@ -16,7 +16,7 @@ class Player {
   void set_id(common::ID id);
 
  private:
-  common::ID id_{0};
+  common::ID m_id{0};
 };
 
 }  // namespace botf::app

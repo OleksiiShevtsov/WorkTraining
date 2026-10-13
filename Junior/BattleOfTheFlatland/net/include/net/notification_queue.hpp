@@ -13,33 +13,33 @@ template <typename T>
 class NotificationQueue {
  public:
   void push(T item) {
-    std::lock_guard lock(mutex_);
-    queue_.push(std::move(item));
+    std::lock_guard lock(m_mutex);
+    m_queue.push(std::move(item));
   }
 
   std::optional<T> try_pop() {
-    std::lock_guard lock(mutex_);
-    if (queue_.empty()) {
+    std::lock_guard lock(m_mutex);
+    if (m_queue.empty()) {
       return std::nullopt;
     }
-    T item = std::move(queue_.front());
-    queue_.pop();
+    T item = std::move(m_queue.front());
+    m_queue.pop();
     return item;
   }
 
   [[nodiscard]] bool empty() const {
-    std::lock_guard lock(mutex_);
-    return queue_.empty();
+    std::lock_guard lock(m_mutex);
+    return m_queue.empty();
   }
 
   [[nodiscard]] std::size_t size() const {
-    std::lock_guard lock(mutex_);
-    return queue_.size();
+    std::lock_guard lock(m_mutex);
+    return m_queue.size();
   }
 
  private:
-  mutable std::mutex mutex_;
-  std::queue<T> queue_;
+  mutable std::mutex m_mutex;
+  std::queue<T> m_queue;
 };
 
 }  // namespace botf::net

@@ -32,9 +32,9 @@ class TcpServer {
   // Accept / recv / send once. Call from the server loop.
   void poll();
 
-  [[nodiscard]] bool is_listening() const { return listening_; }
-  [[nodiscard]] std::size_t client_count() const { return clients_.size(); }
-  [[nodiscard]] std::uint16_t port() const { return port_; }
+  [[nodiscard]] bool is_listening() const { return m_listening; }
+  [[nodiscard]] std::size_t client_count() const { return m_clients.size(); }
+  [[nodiscard]] std::uint16_t port() const { return m_port; }
 
  private:
   struct Client {
@@ -50,16 +50,16 @@ class TcpServer {
   void flush_send_buffers();
   void drop_client(botf::ClientId id);
 
-  InboundQueue& inbound_;
-  OutboundQueue& outbound_;
+  InboundQueue& m_inbound;
+  OutboundQueue& m_outbound;
 
-  sf::TcpListener listener_;
-  sf::SocketSelector selector_;
-  std::unordered_map<botf::ClientId, Client> clients_;
+  sf::TcpListener m_listener;
+  sf::SocketSelector m_selector;
+  std::unordered_map<botf::ClientId, Client> m_clients;
 
-  botf::ClientId next_client_id_ = 1;
-  std::uint16_t port_ = 0;
-  bool listening_ = false;
+  botf::ClientId m_next_client_id = 1;
+  std::uint16_t m_port = 0;
+  bool m_listening = false;
 };
 
 }  // namespace botf::net

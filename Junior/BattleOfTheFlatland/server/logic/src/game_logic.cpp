@@ -12,18 +12,18 @@ GameLogic::GameLogic() {
 }
 
 common::ID GameLogic::spawn_player(common::Point at, float speed_limit) {
-  const common::ID id = next_entity_id_++;
-  objects_.emplace_back(id, at, speed_limit);
+  const common::ID id = m_next_entity_id++;
+  m_objects.emplace_back(id, at, speed_limit);
   return id;
 }
 
 void GameLogic::bind_client(ClientId client_id, common::ID entity_id) {
-  client_to_entity_[client_id] = entity_id;
+  m_client_to_entity[client_id] = entity_id;
 }
 
 void GameLogic::set_client_input(ClientId client_id, int dx, int dy) {
-  const auto it = client_to_entity_.find(client_id);
-  if (it == client_to_entity_.end()) {
+  const auto it = m_client_to_entity.find(client_id);
+  if (it == m_client_to_entity.end()) {
     return;
   }
   set_player_input(it->second, dx, dy);
@@ -36,25 +36,25 @@ void GameLogic::set_player_input(common::ID entity_id, int dx, int dy) {
 }
 
 void GameLogic::tick(float dt) {
-  for (auto& obj : objects_) {
+  for (auto& obj : m_objects) {
     obj.update(dt);
   }
 }
 
 const std::vector<DynamicObject>& GameLogic::objects() const {
-  return objects_;
+  return m_objects;
 }
 
 std::optional<common::ID> GameLogic::entity_for_client(ClientId client_id) const {
-  const auto it = client_to_entity_.find(client_id);
-  if (it == client_to_entity_.end()) {
+  const auto it = m_client_to_entity.find(client_id);
+  if (it == m_client_to_entity.end()) {
     return std::nullopt;
   }
   return it->second;
 }
 
 DynamicObject* GameLogic::find_mutable(common::ID entity_id) {
-  for (auto& obj : objects_) {
+  for (auto& obj : m_objects) {
     if (obj.id() == entity_id) {
       return &obj;
     }

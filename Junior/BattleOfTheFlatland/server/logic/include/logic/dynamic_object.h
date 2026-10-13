@@ -47,17 +47,17 @@ class DynamicObject {
   static constexpr float kAcceleration{50.0f};
   static constexpr float kFriction{-9.81f / 0.4f};
 
-  common::ID id_;
-  common::Point position_{};
-  common::Angle angle_{0.0f};
-  float speed_limit_;
+  common::ID m_id;
+  common::Point m_position{};
+  common::Angle m_angle{0.0f};
+  float m_speed_limit;
 
-  int input_dx_{0};
-  int input_dy_{0};
-  int prev_input_dx_{0};
-  int prev_input_dy_{0};
+  int m_input_dx{0};
+  int m_input_dy{0};
+  int m_prev_input_dx{0};
+  int m_prev_input_dy{0};
 
-  MovementParameters movement_{};
+  MovementParameters m_movement{};
 };
 
 }  // namespace botf

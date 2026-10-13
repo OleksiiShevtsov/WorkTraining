@@ -2,16 +2,16 @@
 
 namespace botf::app {
 
-Player::Player() : id_{0} {}
+Player::Player() : m_id{0} {}
 
-Player::Player(common::ID id) : id_{id} {}
+Player::Player(common::ID id) : m_id{id} {}
 
 common::ID Player::id() const {
-  return id_;
+  return m_id;
 }
 
 void Player::set_id(common::ID id) {
-  id_ = id;
+  m_id = id;
 }
 
 }  // namespace botf::app
