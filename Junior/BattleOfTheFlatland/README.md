@@ -60,14 +60,18 @@ CMake на Windows/LIB собирает protobuf из исходников (`pro
 В корне лежит `.clang-format` (стиль Google, 2 пробела, колонка 100).  
 Visual Studio подхватывает его для **Format Document**.
 
+При обычной сборке CMake сначала гоняет `clang-format` (target `botf_format`), потом компилирует.  
+Нужен `clang-format` в PATH. Отключить:
+
 ```bat
-format.bat
+cmake --preset debug -DBOTF_FORMAT_ON_BUILD=OFF
 ```
 
-или:
+Вручную:
 
 ```bat
-clang-format -i **/*.{cpp,h,hpp}
+format.bat
+cmake --build --preset debug --target botf_format
 ```
 
 ## Build

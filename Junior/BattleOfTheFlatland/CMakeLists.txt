@@ -53,3 +53,6 @@ add_subdirectory(tests)
 # Executables (client owns app/, server owns logic/)
 add_subdirectory(server)
 add_subdirectory(client)
+
+# clang-format before botf_server / botf_client (see cmake/BotfClangFormat.cmake)
+include("${CMAKE_SOURCE_DIR}/cmake/BotfClangFormat.cmake")
