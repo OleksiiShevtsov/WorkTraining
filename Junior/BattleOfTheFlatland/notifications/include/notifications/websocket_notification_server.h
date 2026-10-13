@@ -17,8 +17,6 @@ using websocketpp::connection_hdl;
 namespace bof
 {
 typedef websocketpp::server< websocketpp::config::asio > server;
-using IdPerConnection =
-    std::map< common::ID, std::shared_ptr< websocketpp::connection< websocketpp::config::asio > > >;
 
 class WebSocketNotificationServer : public INotificationServer
 {
@@ -44,15 +42,13 @@ private:
     void msgHandler( connection_hdl hdl, server::message_ptr msg );
     void checkConnection( common::ID playerId );
 
-    void
-    loginHandler( common::ID playerId, const connection_hdl& hdl, const std::string& binaryMsg );
+    void loginHandler( common::ID playerId, const connection_hdl& hdl, const std::string& binaryMsg );
     void logoutHandler( common::ID playerId );
 
     std::thread m_thread;
     std::shared_ptr< server > m_server;
 
     std::shared_ptr< IPublisher > m_inputQueue;
-    IdPerConnection m_playerIdPerConnection;
     std::set< common::ID > m_disconnectedPlayerIds;
 };
-} // namespace sylk
+} // namespace bof

@@ -16,4 +16,4 @@ public:
     virtual common::ID getPlayerId() const                 = 0;
     virtual std::optional< common::ID > getTableId() const = 0;
 };
-} // namespace sylk
+} // namespace bof

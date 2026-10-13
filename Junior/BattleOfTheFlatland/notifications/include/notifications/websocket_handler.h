@@ -21,4 +21,4 @@ private:
     WebSocketNotificationServer& m_webSocketServer;
 };
 } // namespace WebSocketHandler
-} // namespace sylk
+} // namespace bof

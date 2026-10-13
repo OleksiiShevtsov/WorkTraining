@@ -4,13 +4,13 @@ project(BattleOfTheFlatland)
 set(CMAKE_CXX_STANDARD 20)
 
 if(WIN32)
-    add_subdirectory(../../../LIB/SFML  ${CMAKE_CURRENT_BINARY_DIR}/SFML)
-    add_subdirectory(../../../LIB/googletest  ${CMAKE_CURRENT_BINARY_DIR}/googletest)
+    add_subdirectory(LIB/SFML  ${CMAKE_CURRENT_BINARY_DIR}/SFML)
+    add_subdirectory(LIB/googletest  ${CMAKE_CURRENT_BINARY_DIR}/googletest)
     #add_subdirectory(../../../LIB/protobuf  ${CMAKE_CURRENT_BINARY_DIR}/protobuf)
 endif()
 
 add_subdirectory(common/sources ${CMAKE_CURRENT_BINARY_DIR}/common)
-add_subdirectory(common/protobuf ${CMAKE_CURRENT_BINARY_DIR}/proto_messages)
+#add_subdirectory(common/protobuf ${CMAKE_CURRENT_BINARY_DIR}/proto_messages)
 
 add_subdirectory(logic)
 add_subdirectory(app)

@@ -3,9 +3,9 @@
 flower::app::AppRendering::AppRendering() :
     m_textNumberOfCoins{ "0" },
     m_textInStatisticsBox{ "press any key to start" },
-    m_window{ std::make_shared< sf::RenderWindow >( sf::VideoMode(
+    m_window{ std::make_shared< sf::RenderWindow >(sf::VideoMode({
         common::GlobalSettings::pixelCountX * common::GlobalSettings::sizePixel,
-        common::GlobalSettings::pixelCountY * common::GlobalSettings::sizePixel + statisticsBoxHeight ), "Flower" ) }{
+        common::GlobalSettings::pixelCountY * common::GlobalSettings::sizePixel + statisticsBoxHeight}), "Flower") } {
     m_buttonHandler = std::make_shared< ButtonHandler >( m_window );
 }
 
@@ -33,17 +33,18 @@ bool flower::app::AppRendering::isWindowOpen() const {
     return m_window->isOpen();
 }
 
-void flower::app::AppRendering::drawObjects(){
-    sf::Event event;
-    if ( m_window->pollEvent( event ) )
+void flower::app::AppRendering::drawObjects() {
+    while (const std::optional event = m_window->pollEvent())
     {
-        if (event.type == sf::Event::Closed)
+        if (event->is<sf::Event::Closed>())
             m_window->close();
     }
-    m_window->clear( sf::Color( 25, 25, 25 ) );
-    drowFlower();
-    drowSnake();
+    m_window->clear(sf::Color(25, 25, 25));
+
     drowMap();
+    drowSnake();
+    drowFlower();
+
     m_window->display();
 
     m_snakeObjects.clear();
@@ -75,8 +76,9 @@ void flower::app::AppRendering::drowSnake(){
 void flower::app::AppRendering::drowFlower(){
     for ( auto &flower : m_flowerObjects ){
         sf::RectangleShape rectangle;
-        rectangle.setSize( sf::Vector2f( common::GlobalSettings::sizePixel, common::GlobalSettings::sizePixel ) );
+		rectangle.setSize( sf::Vector2f( common::GlobalSettings::sizePixel, common::GlobalSettings::sizePixel ) );
         rectangle.setFillColor( sf::Color( 200, 40, 40 ) );
+        std::cout << "Fill color: " << rectangle.getFillColor().r << " " << rectangle.getFillColor().g << " " << rectangle.getFillColor().b << std::endl;
         rectangle.move( sf::Vector2f( flower.item.x * common::GlobalSettings::sizePixel, flower.item.y * common::GlobalSettings::sizePixel ) );
         m_window->draw( rectangle );
     }
@@ -113,19 +115,18 @@ void flower::app::AppRendering::drowMap(){
     sf::Font font;
 
     // the path needs to be changed depending on the location of the build
-    if ( !font.loadFromFile( "../FlowerGame/app/fonts/arial.ttf" ) )
+    if (!font.openFromFile("app/fonts/arial.ttf"))
     {
-
         std::cout << "textures not loaded" << std::endl;
     }
 
-    sf::Text textNumberOfCoins( "Coins: " + m_textNumberOfCoins, font, 40 );
+    sf::Text textNumberOfCoins(font, "Coins: " + m_textNumberOfCoins, 40);
     textNumberOfCoins.setPosition( sf::Vector2f( statisticsBoxBorderThickness * 2, common::GlobalSettings::pixelCountY * common::GlobalSettings::sizePixel + statisticsBoxBorderThickness * 2 ) );
     textNumberOfCoins.setFillColor( sf::Color( 50, 200, 50 ) );
     textNumberOfCoins.setStyle( sf::Text::Bold );
     m_window->draw( textNumberOfCoins );
 
-    sf::Text textInStatisticsBox( m_textInStatisticsBox, font, 40 );
+    sf::Text textInStatisticsBox(font, m_textInStatisticsBox, 40);
     textInStatisticsBox.setPosition( sf::Vector2f( common::GlobalSettings::pixelCountX * common::GlobalSettings::sizePixel / 2, common::GlobalSettings::pixelCountY * common::GlobalSettings::sizePixel + statisticsBoxBorderThickness * 2 ) );
     textInStatisticsBox.setFillColor( sf::Color( 50, 200, 50 ) );
     textInStatisticsBox.setStyle( sf::Text::Bold );

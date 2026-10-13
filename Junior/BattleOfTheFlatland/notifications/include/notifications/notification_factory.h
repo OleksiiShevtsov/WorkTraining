@@ -31,10 +31,8 @@ struct NotificationHandler
 };
 
 std::optional< NotificationVariant > getNotificationFromProtobuf( const std::string& protoString );
-std::optional< NotificationVariant >
-
-createNotification( common::NotificationTypes notificationType, common::ID playerId );
+std::optional< NotificationVariant > createNotification( common::NotificationTypes notificationType, common::ID playerId );
 
 std::string getProtoStringFromNotification( NotificationVariant notification );
 } // namespace NotificationFactory
-} // namespace sylk
+} // namespace bof

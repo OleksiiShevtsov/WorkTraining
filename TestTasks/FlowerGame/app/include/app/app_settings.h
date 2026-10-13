@@ -2,6 +2,6 @@
 
 namespace flower::app
 {
-    constexpr float statisticsBoxHeight{ 100.0f };
+    constexpr int16_t statisticsBoxHeight{ 100 };
     constexpr float statisticsBoxBorderThickness{ 10.0f };
 }

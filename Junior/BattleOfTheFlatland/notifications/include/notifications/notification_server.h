@@ -19,4 +19,4 @@ public:
     virtual void send( NotificationVariant notification ) = 0;
     virtual void join()                                   = 0;
 };
-} // namespace sylk
+} // namespace bof

@@ -47,15 +47,6 @@ enum class SeatActions
     Call   = 7
 };
 
-enum class PreActions
-{
-    NoPreaction   = 0,
-    pFoldToAnyBet = 1,
-    pCheck        = 2,
-    pCheckOrFold  = 3,
-    pCall         = 4
-};
-
 enum class KickReason
 {
     SitoutLimit = 0

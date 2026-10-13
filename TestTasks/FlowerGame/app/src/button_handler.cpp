@@ -28,7 +28,7 @@ void flower::app::ButtonHandler::join(){
 
 void flower::app::ButtonHandler::handlerClick( std::shared_ptr< sf::RenderWindow > window ){
     while( m_gameState != common::GameState::END ){
-        if ( sf::Mouse::isButtonPressed( sf::Mouse::Right ) && m_buttonState == common::ButtonState::FREE )
+        if ( sf::Mouse::isButtonPressed( sf::Mouse::Button::Right ) && m_buttonState == common::ButtonState::FREE )
         {
             m_pressurePoint.x = sf::Mouse::getPosition( *window.get() ).x / common::GlobalSettings::sizePixel;
             m_pressurePoint.y = sf::Mouse::getPosition( *window.get() ).y / common::GlobalSettings::sizePixel;
