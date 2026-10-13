@@ -75,4 +75,4 @@ endif()
 
 message(STATUS "[botf] BOTF_LIB_ROOT=${BOTF_LIB_ROOT}")
 message(STATUS "[botf] BOTF_BUILD_ROOT=${BOTF_BUILD_ROOT}  (from CMAKE_BUILDS_ROOT or sibling BUILD)")
-message(STATUS "[botf] Prefer CMake preset debug/release: binaryDir = $env{CMAKE_BUILDS_ROOT}/${sourceDirName}/...")
+message(STATUS "[botf] Prefer CMake preset debug/release: binaryDir = \$env{CMAKE_BUILDS_ROOT}/\${sourceDirName}/...")

@@ -52,7 +52,8 @@ setup.bat
 
 Ищет `LIB` рядом с `WorkTraining` (или `BOTF_LIB_ROOT`).  
 Если SFML / googletest / protobuf уже есть — **не клонирует**.  
-Protobuf: тег `v21.12` в `%LIB%\protobuf` (битую папку без `CMakeLists.txt` переклонирует).
+Protobuf: тег `v21.12` в `%LIB%\protobuf` (битую папку без `CMakeLists.txt` переклонирует).  
+CMake на Windows/LIB собирает protobuf из исходников (`protobuf_BUILD_TESTS=OFF`), без системного `find_package`.
 
 ## Build
 
