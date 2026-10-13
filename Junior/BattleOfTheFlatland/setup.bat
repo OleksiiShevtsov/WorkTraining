@@ -74,8 +74,13 @@ if "%PROTO_FRESH%"=="1" (
 
 popd
 echo [botf] Done.
-echo [botf] CMake: cmake -S . -B "%BUILD_DIR%\BattleOfTheFlatland" -DBOTF_LIB_ROOT="%LIB_DIR%"
-echo [botf] Or open CMake preset "default" / "debug" in Visual Studio.
+echo [botf] LIB=%LIB_DIR%
+if defined CMAKE_BUILDS_ROOT (
+  echo [botf] CMAKE_BUILDS_ROOT=%CMAKE_BUILDS_ROOT%
+  echo [botf] Use preset: cmake --preset debug
+) else (
+  echo [botf] WARNING: CMAKE_BUILDS_ROOT is not set — set it to your BUILD folder.
+)
 endlocal
 exit /b 0
 

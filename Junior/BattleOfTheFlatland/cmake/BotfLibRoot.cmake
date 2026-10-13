@@ -74,5 +74,5 @@ if(NOT BOTF_BUILD_ROOT)
 endif()
 
 message(STATUS "[botf] BOTF_LIB_ROOT=${BOTF_LIB_ROOT}")
-message(STATUS "[botf] BOTF_BUILD_ROOT=${BOTF_BUILD_ROOT}")
-message(STATUS "[botf] Use out-of-tree build: cmake -S . -B \"${BOTF_BUILD_ROOT}/BattleOfTheFlatland\"")
+message(STATUS "[botf] BOTF_BUILD_ROOT=${BOTF_BUILD_ROOT}  (from CMAKE_BUILDS_ROOT or sibling BUILD)")
+message(STATUS "[botf] Prefer CMake preset debug/release: binaryDir = $env{CMAKE_BUILDS_ROOT}/${sourceDirName}/...")

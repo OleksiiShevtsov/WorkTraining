@@ -73,4 +73,10 @@ if command -v apt-get >/dev/null 2>&1; then
 fi
 
 echo "[botf] Done."
-echo "[botf] CMake: cmake -S . -B \"${BUILD_DIR}/BattleOfTheFlatland\" -DBOTF_LIB_ROOT=\"${LIB_DIR}\""
+echo "[botf] LIB=${LIB_DIR}"
+if [[ -n "${CMAKE_BUILDS_ROOT:-}" ]]; then
+  echo "[botf] CMAKE_BUILDS_ROOT=${CMAKE_BUILDS_ROOT}"
+  echo "[botf] Use preset: cmake --preset debug"
+else
+  echo "[botf] WARNING: CMAKE_BUILDS_ROOT is not set — set it to your BUILD folder."
+fi

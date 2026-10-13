@@ -4,64 +4,70 @@
 
 ## Раскладка папок
 
-Зависимости и артефакты сборки лежат **рядом с `WorkTraining`**, не внутри проекта:
-
 ```
 <parent>/
 ├── WorkTraining/
 │   └── Junior/BattleOfTheFlatland/   ← исходники
 ├── LIB/                              ← SFML, googletest, protobuf
-└── BUILD/                            ← cmake build (не в проекте!)
-    └── BattleOfTheFlatland/
+└── BUILD/                            ← CMAKE_BUILDS_ROOT указывает сюда
 ```
 
-Если у тебя папка сборок называется иначе (например `BILD`) или уже задан CrashCourse-стиль — выставь:
+## Окружение
 
-```bat
-set CMAKE_BUILDS_ROOT=C:\path\to\BILD
+Глобально в системе (как в CrashCourse):
+
+- `CMAKE_BUILDS_ROOT` → папка `BUILD` (рядом с `LIB` и `WorkTraining`)
+
+Опционально:
+
+- `BOTF_LIB_ROOT` → папка `LIB` (если CMake/setup не находят её сами)
+
+## CMakePresets
+
+Как в остальных уроках — только через env, без абсолютных путей:
+
+```json
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "debug",
+      "binaryDir": "$env{CMAKE_BUILDS_ROOT}/${sourceDirName}/debug"
+    },
+    {
+      "name": "release",
+      "binaryDir": "$env{CMAKE_BUILDS_ROOT}/${sourceDirName}/release"
+    }
+  ]
+}
 ```
 
-## Сторонние библиотеки (`LIB`)
+В Visual Studio выбери preset **debug** или **release**.
+
+## LIB
 
 ```bat
 setup.bat
 ```
 
-Скрипт **сам находит** существующий `LIB` (canonical `../../../LIB` или flat `../LIB`, либо `BOTF_LIB_ROOT`).  
-Если `SFML` / `sfml` / `SFML-*` уже есть — **клонирование пропускается**.
+Ищет `LIB` рядом с `WorkTraining` (или `BOTF_LIB_ROOT`).  
+Если SFML уже есть — **не клонирует**.
 
-```bat
-set BOTF_LIB_ROOT=C:\path\to\LIB
-setup.bat
-```
-
-## Build (вне проекта)
-
-Не используй `cmake -B build` внутри папки проекта.
+## Build
 
 ```bat
 build.bat
+build.bat release
 ```
 
-или вручную:
+или:
 
 ```bat
-cmake -S . -B ..\..\..\BUILD\BattleOfTheFlatland -DBOTF_LIB_ROOT=..\..\..\LIB
-cmake --build ..\..\..\BUILD\BattleOfTheFlatland
+cmake --preset debug
+cmake --build --preset debug
 ```
 
-В Visual Studio: открой папку проекта и выбери preset **`vs-default`** / **`default`**  
-(`binaryDir` = `../../../BUILD/BattleOfTheFlatland`).
-
-Как в CrashCourse, можно:
-
-```bat
-set CMAKE_BUILDS_ROOT=C:\path\to\BUILD
-```
-
-и взять preset `debug` / `release`.
-
-Бинарники: `botf_server`, `botf_client`.
+Бинарники: `botf_server`, `botf_client` в `%CMAKE_BUILDS_ROOT%\BattleOfTheFlatland\debug` (или `release`).
 
 ## Транспорт
 
@@ -79,27 +85,14 @@ set CMAKE_BUILDS_ROOT=C:\path\to\BUILD
 BattleOfTheFlatland/
 ├── cmake/
 ├── common/
-│   ├── sources/include/common/   # общие типы namespace botf (ClientId, …)
-│   └── protobuf/messages/        # proto package botf
-├── net/             # SFML TCP: TcpServer + inbound/outbound очереди
-├── server/          # botf_server
-│   └── logic/       # DynamicObject + GameLogic (только сервер)
-├── client/          # botf_client
-│   └── app/         # SFML UI: AppRendering, InputHandler, SceneObject, Player
+│   ├── sources/include/common/
+│   └── protobuf/messages/
+├── net/
+├── server/
+│   └── logic/
+├── client/
+│   └── app/
 └── tests/
 ```
 
-### net (серверная основа)
-
-- `InboundQueue` — нотификации от клиентов (payload = protobuf Envelope)
-- `OutboundQueue` — нотификации клиентам (`client_id` или broadcast)
-- `TcpServer` — `listen` / `poll` на SFML `TcpListener` + `SocketSelector`
-
-## Proto
-
-- `envelope.proto` — `type + sequence + payload`
-- `move.proto` — состояние движения на тик: `dx,dy ∈ {-1,0,1}` (диагонали ок, `0,0` = idle)
-- `input.proto` — пока не трогаем (aim/fire позже)
-- `world_state.proto` — снимок мира
-
-Сервер: `botf_server` — долгий loop на 20 Hz; `botf_server --smoke` — самопроверка.
+Сервер: `botf_server` — loop 20 Hz; `botf_server --smoke` — самопроверка.
