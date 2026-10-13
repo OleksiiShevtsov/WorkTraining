@@ -119,4 +119,13 @@ BattleOfTheFlatland/
 ```
 
 Сервер: `botf_server` — loop 20 Hz; после каждого `tick` broadcast `WorldState`.  
-`botf_server --smoke` — Move + GameLogic + приём WorldState.
+Клиент: WASD → `Move`; рисует `SceneObject` из последнего `WorldState`.
+
+```
+Move (client → server) → GameLogic.tick → WorldState (server → clients) → draw
+```
+
+```bat
+botf_server --smoke
+botf_client --smoke
+```

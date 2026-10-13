@@ -5,10 +5,17 @@
 namespace botf::app {
 
 AppRendering::AppRendering()
+#if SFML_VERSION_MAJOR >= 3
     : window_{std::make_shared<sf::RenderWindow>(
           sf::VideoMode({static_cast<unsigned int>(common::GlobalSettings::sizeWindowX),
                          static_cast<unsigned int>(common::GlobalSettings::sizeWindowY)}),
           "Battle Of The Flatland")} {
+#else
+    : window_{std::make_shared<sf::RenderWindow>(
+          sf::VideoMode(static_cast<unsigned int>(common::GlobalSettings::sizeWindowX),
+                        static_cast<unsigned int>(common::GlobalSettings::sizeWindowY)),
+          "Battle Of The Flatland")} {
+#endif
   window_->setFramerateLimit(60);
 }
 
@@ -32,9 +39,7 @@ void AppRendering::clear_scene() {
   scene_.clear();
 }
 
-void AppRendering::set_scene_object(common::ID id,
-                                    common::Point position,
-                                    common::Angle angle) {
+void AppRendering::set_scene_object(common::ID id, common::Point position, common::Angle angle) {
   for (auto& obj : scene_) {
     if (obj.id == id) {
       obj.position = position;
@@ -58,10 +63,20 @@ void AppRendering::draw() {
     return;
   }
 
+#if SFML_VERSION_MAJOR >= 3
   while (const std::optional event = window_->pollEvent()) {
-    if (event->is<sf::Event::Closed>())
+    if (event->is<sf::Event::Closed>()) {
       window_->close();
+    }
   }
+#else
+  sf::Event event{};
+  while (window_->pollEvent(event)) {
+    if (event.type == sf::Event::Closed) {
+      window_->close();
+    }
+  }
+#endif
 
   window_->clear(sf::Color(25, 25, 25));
   draw_map();
@@ -80,8 +95,13 @@ void AppRendering::draw_scene_objects() {
   for (const auto& el : scene_) {
     sf::CircleShape circle(10.f);
     circle.setFillColor(sf::Color(120, 20, 20));
+#if SFML_VERSION_MAJOR >= 3
     circle.setOrigin({10.f, 10.f});
     circle.setPosition({el.position.x, el.position.y});
+#else
+    circle.setOrigin(10.f, 10.f);
+    circle.setPosition(el.position.x, el.position.y);
+#endif
     window_->draw(circle);
   }
 }
