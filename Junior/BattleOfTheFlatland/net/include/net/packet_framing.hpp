@@ -33,19 +33,15 @@ inline std::optional<std::string> try_consume_frame(std::vector<std::uint8_t>& b
   }
 
   const std::uint32_t size =
-      static_cast<std::uint32_t>(buffer[0]) |
-      (static_cast<std::uint32_t>(buffer[1]) << 8) |
-      (static_cast<std::uint32_t>(buffer[2]) << 16) |
-      (static_cast<std::uint32_t>(buffer[3]) << 24);
+      static_cast<std::uint32_t>(buffer[0]) | (static_cast<std::uint32_t>(buffer[1]) << 8) |
+      (static_cast<std::uint32_t>(buffer[2]) << 16) | (static_cast<std::uint32_t>(buffer[3]) << 24);
 
   const std::size_t total = kLengthPrefixSize + static_cast<std::size_t>(size);
   if (buffer.size() < total) {
     return std::nullopt;
   }
 
-  std::string payload(
-      reinterpret_cast<const char*>(buffer.data() + kLengthPrefixSize),
-      size);
+  std::string payload(reinterpret_cast<const char*>(buffer.data() + kLengthPrefixSize), size);
   buffer.erase(buffer.begin(), buffer.begin() + static_cast<std::ptrdiff_t>(total));
   return payload;
 }

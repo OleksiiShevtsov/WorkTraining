@@ -55,6 +55,21 @@ setup.bat
 Protobuf: тег `v21.12` в `%LIB%\protobuf` (битую папку без `CMakeLists.txt` переклонирует).  
 CMake на Windows/LIB собирает protobuf из исходников (`protobuf_BUILD_TESTS=OFF`), без системного `find_package`.
 
+## Format
+
+В корне лежит `.clang-format` (стиль Google, 2 пробела, колонка 100).  
+Visual Studio подхватывает его для **Format Document**.
+
+```bat
+format.bat
+```
+
+или:
+
+```bat
+clang-format -i **/*.{cpp,h,hpp}
+```
+
 ## Build
 
 ```bat

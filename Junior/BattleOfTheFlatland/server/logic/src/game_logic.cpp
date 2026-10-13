@@ -6,8 +6,7 @@ namespace botf {
 
 GameLogic::GameLogic() {
   const common::ID id = spawn_player(
-      common::Point{common::GlobalSettings::defaultSpawnX,
-                    common::GlobalSettings::defaultSpawnY},
+      common::Point{common::GlobalSettings::defaultSpawnX, common::GlobalSettings::defaultSpawnY},
       common::GlobalSettings::defaultPlayerSpeedLimit);
   (void)id;
 }

@@ -54,8 +54,7 @@ void ensure_client_bound(GameLogic& game, ClientId client_id) {
   }
 
   const common::ID entity = game.spawn_player(
-      common::Point{common::GlobalSettings::defaultSpawnX,
-                    common::GlobalSettings::defaultSpawnY},
+      common::Point{common::GlobalSettings::defaultSpawnX, common::GlobalSettings::defaultSpawnY},
       common::GlobalSettings::defaultPlayerSpeedLimit);
   game.bind_client(client_id, entity);
 }
@@ -73,8 +72,8 @@ void apply_inbound_move(net::InboundQueue& inbound,
 
     if (envelope.type() != MESSAGE_TYPE_MOVE) {
       if (verbose) {
-        std::cout << "[server] ignore type=" << envelope.type()
-                  << " from client " << note->client_id << '\n';
+        std::cout << "[server] ignore type=" << envelope.type() << " from client "
+                  << note->client_id << '\n';
       }
       continue;
     }
@@ -92,10 +91,8 @@ void apply_inbound_move(net::InboundQueue& inbound,
     game.set_client_input(note->client_id, move.dx(), move.dy());
 
     if (verbose) {
-      std::cout << "[server] Move state client=" << note->client_id
-                << " " << net::to_string(move)
-                << " dx=" << move.dx() << " dy=" << move.dy()
-                << " tick=" << move.tick()
+      std::cout << "[server] Move state client=" << note->client_id << " " << net::to_string(move)
+                << " dx=" << move.dx() << " dy=" << move.dy() << " tick=" << move.tick()
                 << " seq=" << envelope.sequence() << '\n';
     }
   }
@@ -129,8 +126,8 @@ int run_smoke(net::TcpServer& server,
 
   // Hold each Move state for several sim ticks (matches real client cadence).
   for (const auto& sample : samples) {
-    if (!send_framed(client, net::make_move_envelope(
-                                 sample.dx, sample.dy, sample.tick, sample.seq))) {
+    if (!send_framed(client,
+                     net::make_move_envelope(sample.dx, sample.dy, sample.tick, sample.seq))) {
       std::cerr << "[server] smoke client failed to send Move\n";
       return 1;
     }
@@ -162,8 +159,8 @@ int run_smoke(net::TcpServer& server,
   }
 
   const auto end = game.objects().front().position();
-  std::cout << "[server] logic pos start=(" << start.x << "," << start.y << ") end=("
-            << end.x << "," << end.y << ")\n";
+  std::cout << "[server] logic pos start=(" << start.x << "," << start.y << ") end=(" << end.x
+            << "," << end.y << ")\n";
 
   if (end.x == start.x && end.y == start.y) {
     std::cerr << "[server] smoke failed: DynamicObject did not move\n";
@@ -178,8 +175,8 @@ int run_loop(net::TcpServer& server,
              net::InboundQueue& inbound,
              std::unordered_map<ClientId, ClientInputState>& states,
              GameLogic& game) {
-  std::cout << "[server] running on port " << kPort
-            << " at " << kTickHz << " Hz (Ctrl+C to stop)\n";
+  std::cout << "[server] running on port " << kPort << " at " << kTickHz
+            << " Hz (Ctrl+C to stop)\n";
   std::cout << "[server] Move → GameLogic.set_client_input → tick(" << kDt << ")\n";
 
   std::uint64_t server_tick = 0;
@@ -193,8 +190,7 @@ int run_loop(net::TcpServer& server,
     ++server_tick;
     if (server_tick % static_cast<std::uint64_t>(kTickHz) == 0) {
       const auto& objects = game.objects();
-      std::cout << "[server] heartbeat tick=" << server_tick
-                << " clients=" << server.client_count()
+      std::cout << "[server] heartbeat tick=" << server_tick << " clients=" << server.client_count()
                 << " entities=" << objects.size();
       if (!objects.empty()) {
         const auto p = objects.front().position();

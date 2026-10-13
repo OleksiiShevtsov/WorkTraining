@@ -13,11 +13,7 @@ namespace {
 
 constexpr std::uint16_t kPort = 54545;
 
-bool send_move(sf::TcpSocket& socket,
-               int dx,
-               int dy,
-               std::uint32_t tick,
-               std::uint64_t sequence) {
+bool send_move(sf::TcpSocket& socket, int dx, int dy, std::uint32_t tick, std::uint64_t sequence) {
   const auto envelope = net::make_move_envelope(dx, dy, tick, sequence);
   const auto packet = net::frame_payload(envelope);
   return socket.send(packet.data(), packet.size()) == sf::Socket::Done;
@@ -33,15 +29,13 @@ bool try_connect(sf::TcpSocket& socket) {
 int run_smoke_no_window() {
   app::InputHandler input;
   const auto sample = input.read_move_input();  // likely idle without display focus
-  const auto packet =
-      net::frame_payload(net::make_move_envelope(sample.dx, sample.dy, 1, 1));
+  const auto packet = net::frame_payload(net::make_move_envelope(sample.dx, sample.dy, 1, 1));
 
   app::Player player;
   player.set_id(1);
 
   app::SceneObject obj{player.id(), common::Point{100.f, 300.f}, 0.f};
-  std::cout << "[client] smoke ok scene_id=" << obj.id
-            << " packet_size=" << packet.size() << '\n';
+  std::cout << "[client] smoke ok scene_id=" << obj.id << " packet_size=" << packet.size() << '\n';
   return 0;
 }
 
@@ -92,8 +86,7 @@ int run_client(int argc, char** argv) {
   while (app.is_window_open()) {
     const app::MoveInput input = app.input_handler().read_move_input();
 
-    if (net_ok && (input.dx != last_sent.dx || input.dy != last_sent.dy ||
-                   (tick % 3u) == 0u)) {
+    if (net_ok && (input.dx != last_sent.dx || input.dy != last_sent.dy || (tick % 3u) == 0u)) {
       if (!send_move(socket, input.dx, input.dy, tick, sequence)) {
         std::cerr << "[client] send failed — disconnecting network\n";
         net_ok = false;

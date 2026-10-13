@@ -32,9 +32,7 @@ void AppRendering::clear_scene() {
   scene_.clear();
 }
 
-void AppRendering::set_scene_object(common::ID id,
-                                    common::Point position,
-                                    common::Angle angle) {
+void AppRendering::set_scene_object(common::ID id, common::Point position, common::Angle angle) {
   for (auto& obj : scene_) {
     if (obj.id == id) {
       obj.position = position;

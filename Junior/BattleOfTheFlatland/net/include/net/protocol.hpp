@@ -51,10 +51,7 @@ inline std::string to_string(const botf::Move& move) {
 }
 
 // Serialized Envelope bytes (without length prefix).
-inline std::string make_move_envelope(int dx,
-                                      int dy,
-                                      std::uint32_t tick,
-                                      std::uint64_t sequence) {
+inline std::string make_move_envelope(int dx, int dy, std::uint32_t tick, std::uint64_t sequence) {
   botf::Move move;
   move.set_dx(clamp_axis(dx));
   move.set_dy(clamp_axis(dy));

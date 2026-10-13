@@ -90,8 +90,7 @@ void TcpServer::accept_new_clients() {
   client.socket = std::move(socket);
   clients_.emplace(id, std::move(client));
 
-  std::cout << "[net] client connected id=" << id
-            << " (total " << clients_.size() << ")\n";
+  std::cout << "[net] client connected id=" << id << " (total " << clients_.size() << ")\n";
 }
 
 void TcpServer::receive_from_clients() {
@@ -114,10 +113,7 @@ void TcpServer::receive_from_clients() {
       continue;
     }
 
-    client.recv_buffer.insert(
-        client.recv_buffer.end(),
-        chunk.data(),
-        chunk.data() + received);
+    client.recv_buffer.insert(client.recv_buffer.end(), chunk.data(), chunk.data() + received);
 
     while (auto payload = try_consume_frame(client.recv_buffer)) {
       inbound_.push(InboundNotification{id, std::move(*payload)});
@@ -155,10 +151,8 @@ void TcpServer::flush_send_buffers() {
   for (auto& [id, client] : clients_) {
     while (!client.send_buffer.empty()) {
       std::size_t sent = 0;
-      const auto status = client.socket->send(
-          client.send_buffer.data(),
-          client.send_buffer.size(),
-          sent);
+      const auto status =
+          client.socket->send(client.send_buffer.data(), client.send_buffer.size(), sent);
 
       if (status == sf::Socket::Disconnected || status == sf::Socket::Error) {
         to_drop.push_back(id);
@@ -166,9 +160,8 @@ void TcpServer::flush_send_buffers() {
       }
 
       if (sent > 0) {
-        client.send_buffer.erase(
-            client.send_buffer.begin(),
-            client.send_buffer.begin() + static_cast<std::ptrdiff_t>(sent));
+        client.send_buffer.erase(client.send_buffer.begin(),
+                                 client.send_buffer.begin() + static_cast<std::ptrdiff_t>(sent));
       }
 
       if (status == sf::Socket::Partial || status == sf::Socket::NotReady) {
@@ -194,8 +187,7 @@ void TcpServer::drop_client(botf::ClientId id) {
   selector_.remove(*it->second.socket);
   it->second.socket->disconnect();
   clients_.erase(it);
-  std::cout << "[net] client disconnected id=" << id
-            << " (total " << clients_.size() << ")\n";
+  std::cout << "[net] client disconnected id=" << id << " (total " << clients_.size() << ")\n";
 }
 
 }  // namespace botf::net

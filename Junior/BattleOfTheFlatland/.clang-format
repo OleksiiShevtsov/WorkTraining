@@ -1,0 +1,38 @@
+# BattleOfTheFlatland — matches existing sources (2-space, Attach braces).
+# Visual Studio: enables Format Document with ClangFormat when this file is present.
+BasedOnStyle: Google
+Language: Cpp
+
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+ColumnLimit: 100
+
+AccessModifierOffset: -1
+NamespaceIndentation: None
+FixNamespaceComments: true
+
+DerivePointerAlignment: false
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+
+BreakBeforeBraces: Attach
+BreakConstructorInitializers: BeforeComma
+ConstructorInitializerIndentWidth: 4
+PackConstructorInitializers: NextLine
+
+IncludeBlocks: Preserve
+SortIncludes: CaseSensitive
+
+# Keep [[nodiscard]] / attributes readable.
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: true
+BinPackParameters: false
+
+PenaltyBreakAssignment: 2
+PenaltyReturnTypeOnItsOwnLine: 1000
