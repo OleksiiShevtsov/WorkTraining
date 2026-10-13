@@ -26,7 +26,7 @@ bool TcpServer::listen(std::uint16_t port) {
   stop();
 
   listener_.setBlocking(false);
-  if (listener_.listen(port) != sf::Socket::Done) {
+  if (listener_.listen(port) != sf::Socket::Status::Done) {
     std::cerr << "[net] failed to listen on port " << port << '\n';
     return false;
   }
@@ -77,7 +77,7 @@ void TcpServer::accept_new_clients() {
   }
 
   auto socket = std::make_unique<sf::TcpSocket>();
-  if (listener_.accept(*socket) != sf::Socket::Done) {
+  if (listener_.accept(*socket) != sf::Socket::Status::Done) {
     return;
   }
 
@@ -105,11 +105,11 @@ void TcpServer::receive_from_clients() {
     std::size_t received = 0;
     const auto status = client.socket->receive(chunk.data(), chunk.size(), received);
 
-    if (status == sf::Socket::Disconnected || status == sf::Socket::Error) {
+    if (status == sf::Socket::Status::Disconnected || status == sf::Socket::Status::Error) {
       to_drop.push_back(id);
       continue;
     }
-    if (status != sf::Socket::Done || received == 0) {
+    if (status != sf::Socket::Status::Done || received == 0) {
       continue;
     }
 
@@ -154,20 +154,20 @@ void TcpServer::flush_send_buffers() {
       const auto status =
           client.socket->send(client.send_buffer.data(), client.send_buffer.size(), sent);
 
-      if (status == sf::Socket::Disconnected || status == sf::Socket::Error) {
+      if (status == sf::Socket::Status::Disconnected || status == sf::Socket::Status::Error) {
         to_drop.push_back(id);
         break;
       }
 
-      if (sent > 0) {
+      if (sent > 0) {   
         client.send_buffer.erase(client.send_buffer.begin(),
                                  client.send_buffer.begin() + static_cast<std::ptrdiff_t>(sent));
       }
 
-      if (status == sf::Socket::Partial || status == sf::Socket::NotReady) {
+      if (status == sf::Socket::Status::Partial || status == sf::Socket::Status::NotReady) {
         break;
       }
-      if (status != sf::Socket::Done) {
+      if (status != sf::Socket::Status::Done) {
         break;
       }
     }

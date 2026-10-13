@@ -12,8 +12,8 @@ struct SceneObject {
 };
 
 struct MoveInput {
-  int dx{0};
-  int dy{0};
+  int8_t dx{};
+  int8_t dy{};
 };
 
 }  // namespace botf::app

@@ -16,14 +16,14 @@ constexpr std::uint16_t kPort = 54545;
 bool send_move(sf::TcpSocket& socket, int dx, int dy, std::uint32_t tick, std::uint64_t sequence) {
   const auto envelope = net::make_move_envelope(dx, dy, tick, sequence);
   const auto packet = net::frame_payload(envelope);
-  return socket.send(packet.data(), packet.size()) == sf::Socket::Done;
+  return socket.send(packet.data(), packet.size()) == sf::Socket::Status::Done;
 }
 
 bool try_connect(sf::TcpSocket& socket) {
   socket.setBlocking(true);
   const auto status = socket.connect(sf::IpAddress::LocalHost, kPort, sf::seconds(1));
   socket.setBlocking(false);
-  return status == sf::Socket::Done;
+  return status == sf::Socket::Status::Done;
 }
 
 int run_smoke_no_window() {

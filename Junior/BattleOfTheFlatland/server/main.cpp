@@ -34,7 +34,7 @@ void on_signal(int) {
 
 bool send_framed(sf::TcpSocket& socket, const std::string& envelope_bytes) {
   const auto packet = net::frame_payload(envelope_bytes);
-  return socket.send(packet.data(), packet.size()) == sf::Socket::Done;
+  return socket.send(packet.data(), packet.size()) == sf::Socket::Status::Done;
 }
 
 struct ClientInputState {
@@ -104,7 +104,7 @@ int run_smoke(net::TcpServer& server,
               GameLogic& game) {
   sf::TcpSocket client;
   client.setBlocking(true);
-  if (client.connect(sf::IpAddress::LocalHost, kPort, sf::seconds(2)) != sf::Socket::Done) {
+  if (client.connect(sf::IpAddress::LocalHost, kPort, sf::seconds(2)) != sf::Socket::Status::Done) {
     std::cerr << "[server] smoke client failed to connect\n";
     return 1;
   }

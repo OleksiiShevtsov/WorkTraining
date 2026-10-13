@@ -7,14 +7,14 @@ namespace botf::app {
 MoveInput InputHandler::read_move_input() const {
   MoveInput input{};
 
-  const bool up =
-      sf::Keyboard::isKeyPressed(sf::Keyboard::Up) || sf::Keyboard::isKeyPressed(sf::Keyboard::W);
-  const bool down =
-      sf::Keyboard::isKeyPressed(sf::Keyboard::Down) || sf::Keyboard::isKeyPressed(sf::Keyboard::S);
-  const bool left =
-      sf::Keyboard::isKeyPressed(sf::Keyboard::Left) || sf::Keyboard::isKeyPressed(sf::Keyboard::A);
-  const bool right = sf::Keyboard::isKeyPressed(sf::Keyboard::Right) ||
-                     sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+  const bool up = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) ||
+                  sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W);
+  const bool down = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down) ||
+                    sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S);
+  const bool left = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left) ||
+                    sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A);
+  const bool right = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right) ||
+                     sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D);
 
   if (up) {
     input.dy += 1;
