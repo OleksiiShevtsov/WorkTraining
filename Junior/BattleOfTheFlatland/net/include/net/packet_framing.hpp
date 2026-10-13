@@ -12,7 +12,7 @@ namespace botf::net {
 // Payload is typically a serialized botf.Envelope (protobuf).
 inline constexpr std::size_t kLengthPrefixSize = 4;
 
-inline std::vector<std::uint8_t> frame_payload(const std::string& payload) {
+inline std::vector<std::uint8_t> framePayload(const std::string& payload) {
   std::vector<std::uint8_t> out(kLengthPrefixSize + payload.size());
   const auto size = static_cast<std::uint32_t>(payload.size());
   out[0] = static_cast<std::uint8_t>(size & 0xFFu);
@@ -27,7 +27,7 @@ inline std::vector<std::uint8_t> frame_payload(const std::string& payload) {
 
 // Appends incoming socket bytes into `buffer`. If a full frame is available,
 // returns its payload and removes it from `buffer`.
-inline std::optional<std::string> try_consume_frame(std::vector<std::uint8_t>& buffer) {
+inline std::optional<std::string> tryConsumeFrame(std::vector<std::uint8_t>& buffer) {
   if (buffer.size() < kLengthPrefixSize) {
     return std::nullopt;
   }

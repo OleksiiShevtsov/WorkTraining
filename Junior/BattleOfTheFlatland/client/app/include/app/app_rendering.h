@@ -20,23 +20,23 @@ class AppRendering {
 
   [[nodiscard]] Player& player();
   [[nodiscard]] const Player& player() const;
-  [[nodiscard]] InputHandler& input_handler();
-  [[nodiscard]] const InputHandler& input_handler() const;
+  [[nodiscard]] InputHandler& inputHandler();
+  [[nodiscard]] const InputHandler& inputHandler() const;
 
   // Scene for this frame (typically filled from WorldState).
-  void clear_scene();
-  void set_scene_object(common::ID id, common::Point position, common::Angle angle);
-  void set_scene(std::vector<SceneObject> objects);
+  void clearScene();
+  void setSceneObject(common::ID id, common::Point position, common::Angle angle);
+  void setScene(std::vector<SceneObject> objects);
 
-  [[nodiscard]] bool is_window_open() const;
+  [[nodiscard]] bool isWindowOpen() const;
   void draw();
 
  private:
-  void draw_map();
-  void draw_scene_objects();
+  void drawMap();
+  void drawSceneObjects();
 
   Player m_player{};
-  InputHandler m_input_handler{};
+  InputHandler m_inputHandler{};
   std::vector<SceneObject> m_scene;
   std::shared_ptr<sf::RenderWindow> m_window;
 };

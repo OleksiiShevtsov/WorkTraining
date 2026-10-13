@@ -27,19 +27,19 @@ const Player& AppRendering::player() const {
   return m_player;
 }
 
-InputHandler& AppRendering::input_handler() {
-  return m_input_handler;
+InputHandler& AppRendering::inputHandler() {
+  return m_inputHandler;
 }
 
-const InputHandler& AppRendering::input_handler() const {
-  return m_input_handler;
+const InputHandler& AppRendering::inputHandler() const {
+  return m_inputHandler;
 }
 
-void AppRendering::clear_scene() {
+void AppRendering::clearScene() {
   m_scene.clear();
 }
 
-void AppRendering::set_scene_object(common::ID id, common::Point position, common::Angle angle) {
+void AppRendering::setSceneObject(common::ID id, common::Point position, common::Angle angle) {
   for (auto& obj : m_scene) {
     if (obj.id == id) {
       obj.position = position;
@@ -50,11 +50,11 @@ void AppRendering::set_scene_object(common::ID id, common::Point position, commo
   m_scene.push_back(SceneObject{id, position, angle});
 }
 
-void AppRendering::set_scene(std::vector<SceneObject> objects) {
+void AppRendering::setScene(std::vector<SceneObject> objects) {
   m_scene = std::move(objects);
 }
 
-bool AppRendering::is_window_open() const {
+bool AppRendering::isWindowOpen() const {
   return m_window && m_window->isOpen();
 }
 
@@ -79,19 +79,19 @@ void AppRendering::draw() {
 #endif
 
   m_window->clear(sf::Color(25, 25, 25));
-  draw_map();
-  draw_scene_objects();
+  drawMap();
+  drawSceneObjects();
   m_window->display();
 
   // Fresh scene each frame; caller fills from WorldState before draw().
   m_scene.clear();
 }
 
-void AppRendering::draw_map() {
+void AppRendering::drawMap() {
   // Map rendering later.
 }
 
-void AppRendering::draw_scene_objects() {
+void AppRendering::drawSceneObjects() {
   for (const auto& el : m_scene) {
     sf::CircleShape circle(10.f);
     circle.setFillColor(sf::Color(120, 20, 20));

@@ -9,7 +9,7 @@
 namespace botf::net {
 namespace {
 
-void append_bytes(std::vector<std::uint8_t>& dst, const std::vector<std::uint8_t>& src) {
+void appendBytes(std::vector<std::uint8_t>& dst, const std::vector<std::uint8_t>& src) {
   dst.insert(dst.end(), src.begin(), src.end());
 }
 
@@ -61,17 +61,17 @@ void TcpServer::poll() {
     return;
   }
 
-  dispatch_outbound();
+  dispatchOutbound();
 
   if (m_selector.wait(sf::milliseconds(1))) {
-    accept_new_clients();
-    receive_from_clients();
+    acceptNewClients();
+    receiveFromClients();
   }
 
-  flush_send_buffers();
+  flushSendBuffers();
 }
 
-void TcpServer::accept_new_clients() {
+void TcpServer::acceptNewClients() {
   if (!m_selector.isReady(m_listener)) {
     return;
   }
@@ -82,7 +82,7 @@ void TcpServer::accept_new_clients() {
   }
 
   socket->setBlocking(false);
-  const botf::ClientId id = m_next_client_id++;
+  const botf::ClientId id = m_nextClientId++;
   m_selector.add(*socket);
 
   Client client;
@@ -93,8 +93,8 @@ void TcpServer::accept_new_clients() {
   std::cout << "[net] client connected id=" << id << " (total " << m_clients.size() << ")\n";
 }
 
-void TcpServer::receive_from_clients() {
-  std::vector<botf::ClientId> to_drop;
+void TcpServer::receiveFromClients() {
+  std::vector<botf::ClientId> toDrop;
 
   for (auto& [id, client] : m_clients) {
     if (!m_selector.isReady(*client.socket)) {
@@ -106,62 +106,62 @@ void TcpServer::receive_from_clients() {
     const auto status = client.socket->receive(chunk.data(), chunk.size(), received);
 
     if (status == sf::Socket::Status::Disconnected || status == sf::Socket::Status::Error) {
-      to_drop.push_back(id);
+      toDrop.push_back(id);
       continue;
     }
     if (status != sf::Socket::Status::Done || received == 0) {
       continue;
     }
 
-    client.recv_buffer.insert(client.recv_buffer.end(), chunk.data(), chunk.data() + received);
+    client.recvBuffer.insert(client.recvBuffer.end(), chunk.data(), chunk.data() + received);
 
-    while (auto payload = try_consume_frame(client.recv_buffer)) {
+    while (auto payload = tryConsumeFrame(client.recvBuffer)) {
       m_inbound.push(InboundNotification{id, std::move(*payload)});
     }
   }
 
-  for (const botf::ClientId id : to_drop) {
-    drop_client(id);
+  for (const botf::ClientId id : toDrop) {
+    dropClient(id);
   }
 }
 
-void TcpServer::dispatch_outbound() {
-  while (auto note = m_outbound.try_pop()) {
-    const auto framed = frame_payload(note->payload);
+void TcpServer::dispatchOutbound() {
+  while (auto note = m_outbound.tryPop()) {
+    const auto framed = framePayload(note->payload);
 
-    if (!note->client_id.has_value()) {
+    if (!note->clientId.has_value()) {
       for (auto& [id, client] : m_clients) {
         (void)id;
-        append_bytes(client.send_buffer, framed);
+        appendBytes(client.sendBuffer, framed);
       }
       continue;
     }
 
-    const auto it = m_clients.find(*note->client_id);
+    const auto it = m_clients.find(*note->clientId);
     if (it == m_clients.end()) {
       continue;
     }
-    append_bytes(it->second.send_buffer, framed);
+    appendBytes(it->second.sendBuffer, framed);
   }
 }
 
-void TcpServer::flush_send_buffers() {
-  std::vector<botf::ClientId> to_drop;
+void TcpServer::flushSendBuffers() {
+  std::vector<botf::ClientId> toDrop;
 
   for (auto& [id, client] : m_clients) {
-    while (!client.send_buffer.empty()) {
+    while (!client.sendBuffer.empty()) {
       std::size_t sent = 0;
       const auto status =
-          client.socket->send(client.send_buffer.data(), client.send_buffer.size(), sent);
+          client.socket->send(client.sendBuffer.data(), client.sendBuffer.size(), sent);
 
       if (status == sf::Socket::Status::Disconnected || status == sf::Socket::Status::Error) {
-        to_drop.push_back(id);
+        toDrop.push_back(id);
         break;
       }
 
       if (sent > 0) {
-        client.send_buffer.erase(client.send_buffer.begin(),
-                                 client.send_buffer.begin() + static_cast<std::ptrdiff_t>(sent));
+        client.sendBuffer.erase(client.sendBuffer.begin(),
+                                client.sendBuffer.begin() + static_cast<std::ptrdiff_t>(sent));
       }
 
       if (status == sf::Socket::Status::Partial || status == sf::Socket::Status::NotReady) {
@@ -173,12 +173,12 @@ void TcpServer::flush_send_buffers() {
     }
   }
 
-  for (const botf::ClientId id : to_drop) {
-    drop_client(id);
+  for (const botf::ClientId id : toDrop) {
+    dropClient(id);
   }
 }
 
-void TcpServer::drop_client(botf::ClientId id) {
+void TcpServer::dropClient(botf::ClientId id) {
   const auto it = m_clients.find(id);
   if (it == m_clients.end()) {
     return;

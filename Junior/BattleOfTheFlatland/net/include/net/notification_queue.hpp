@@ -17,7 +17,7 @@ class NotificationQueue {
     m_queue.push(std::move(item));
   }
 
-  std::optional<T> try_pop() {
+  std::optional<T> tryPop() {
     std::lock_guard lock(m_mutex);
     if (m_queue.empty()) {
       return std::nullopt;
