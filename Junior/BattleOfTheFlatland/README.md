@@ -2,31 +2,66 @@
 
 Скелет client–server 2D-игры на C++20 + CMake + SFML + Protobuf.
 
-## Сторонние библиотеки (`LIB`)
+## Раскладка папок
 
-Зависимости лежат **рядом с репозиторием `WorkTraining`**, не внутри него:
+Зависимости и артефакты сборки лежат **рядом с `WorkTraining`**, не внутри проекта:
 
 ```
 <parent>/
 ├── WorkTraining/
-│   └── Junior/BattleOfTheFlatland/
-└── LIB/
-    ├── SFML/
-    ├── googletest/
-    └── protobuf/
+│   └── Junior/BattleOfTheFlatland/   ← исходники
+├── LIB/                              ← SFML, googletest, protobuf
+└── BUILD/                            ← cmake build (не в проекте!)
+    └── BattleOfTheFlatland/
 ```
 
-Установка:
+Если у тебя папка сборок называется иначе (например `BILD`) или уже задан CrashCourse-стиль — выставь:
+
+```bat
+set CMAKE_BUILDS_ROOT=C:\path\to\BILD
+```
+
+## Сторонние библиотеки (`LIB`)
 
 ```bat
 setup.bat
 ```
 
-CMake сам резолвит путь в `BOTF_LIB_ROOT` (см. `cmake/BotfLibRoot.cmake`). При необходимости:
+Скрипт **сам находит** существующий `LIB` (canonical `../../../LIB` или flat `../LIB`, либо `BOTF_LIB_ROOT`).  
+Если `SFML` / `sfml` / `SFML-*` уже есть — **клонирование пропускается**.
 
-```powershell
-cmake -S . -B build -DBOTF_LIB_ROOT=C:\path\to\LIB
+```bat
+set BOTF_LIB_ROOT=C:\path\to\LIB
+setup.bat
 ```
+
+## Build (вне проекта)
+
+Не используй `cmake -B build` внутри папки проекта.
+
+```bat
+build.bat
+```
+
+или вручную:
+
+```bat
+cmake -S . -B ..\..\..\BUILD\BattleOfTheFlatland -DBOTF_LIB_ROOT=..\..\..\LIB
+cmake --build ..\..\..\BUILD\BattleOfTheFlatland
+```
+
+В Visual Studio: открой папку проекта и выбери preset **`vs-default`** / **`default`**  
+(`binaryDir` = `../../../BUILD/BattleOfTheFlatland`).
+
+Как в CrashCourse, можно:
+
+```bat
+set CMAKE_BUILDS_ROOT=C:\path\to\BUILD
+```
+
+и взять preset `debug` / `release`.
+
+Бинарники: `botf_server`, `botf_client`.
 
 ## Транспорт
 
@@ -68,12 +103,3 @@ BattleOfTheFlatland/
 - `world_state.proto` — снимок мира
 
 Сервер: `botf_server` — долгий loop на 20 Hz; `botf_server --smoke` — самопроверка.
-
-## Build
-
-```powershell
-cmake -S . -B build
-cmake --build build
-```
-
-Бинарники: `botf_server`, `botf_client`.

@@ -6,17 +6,43 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include("${CMAKE_SOURCE_DIR}/cmake/BotfLibRoot.cmake")
 
+# Guard: binary dir must not be inside the source tree (use sibling BUILD/).
+get_filename_component(_botf_src "${CMAKE_SOURCE_DIR}" ABSOLUTE)
+get_filename_component(_botf_bin "${CMAKE_BINARY_DIR}" ABSOLUTE)
+string(FIND "${_botf_bin}" "${_botf_src}/" _botf_bin_inside)
+if(_botf_bin_inside EQUAL 0)
+    message(WARNING
+        "[botf] Build directory is inside the project:\n"
+        "  ${CMAKE_BINARY_DIR}\n"
+        "Preferred layout uses a sibling BUILD folder:\n"
+        "  cmake -S . -B \"${BOTF_BUILD_ROOT}/BattleOfTheFlatland\"\n"
+        "Or open CMake preset 'default' / 'vs-default'.")
+endif()
+
+function(botf_add_lib_subdir name)
+    set(_candidates
+        "${BOTF_LIB_ROOT}/${name}"
+        "${BOTF_LIB_ROOT}/${name}"
+    )
+    if(name STREQUAL "SFML")
+        list(APPEND _candidates "${BOTF_LIB_ROOT}/sfml")
+        file(GLOB _sfml_ver_dirs "${BOTF_LIB_ROOT}/SFML-*")
+        list(APPEND _candidates ${_sfml_ver_dirs})
+    endif()
+
+    foreach(_dir IN LISTS _candidates)
+        if(EXISTS "${_dir}/CMakeLists.txt")
+            message(STATUS "[botf] Using ${name} from ${_dir}")
+            add_subdirectory("${_dir}" "${CMAKE_BINARY_DIR}/_deps/${name}")
+            return()
+        endif()
+    endforeach()
+    message(WARNING "[botf] ${name} not found under ${BOTF_LIB_ROOT}. Run setup.bat (it skips clone if already present).")
+endfunction()
+
 if(WIN32)
-    if(EXISTS "${BOTF_LIB_ROOT}/SFML/CMakeLists.txt")
-        add_subdirectory("${BOTF_LIB_ROOT}/SFML" ${CMAKE_CURRENT_BINARY_DIR}/SFML)
-    else()
-        message(WARNING "[botf] SFML not found in ${BOTF_LIB_ROOT}. Run setup.bat")
-    endif()
-    if(EXISTS "${BOTF_LIB_ROOT}/googletest/CMakeLists.txt")
-        add_subdirectory("${BOTF_LIB_ROOT}/googletest" ${CMAKE_CURRENT_BINARY_DIR}/googletest)
-    else()
-        message(WARNING "[botf] googletest not found in ${BOTF_LIB_ROOT}. Run setup.bat")
-    endif()
+    botf_add_lib_subdir(SFML)
+    botf_add_lib_subdir(googletest)
 else()
     find_package(SFML 2.5 COMPONENTS system window graphics network REQUIRED)
     find_package(GTest QUIET)

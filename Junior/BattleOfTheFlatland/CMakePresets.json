@@ -1,0 +1,56 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "default",
+      "displayName": "BUILD next to LIB (out-of-tree)",
+      "binaryDir": "${sourceDir}/../../../BUILD/BattleOfTheFlatland",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "vs-default",
+      "displayName": "Visual Studio — BUILD next to LIB",
+      "generator": "Visual Studio 17 2022",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/../../../BUILD/BattleOfTheFlatland"
+    },
+    {
+      "name": "debug",
+      "displayName": "CMAKE_BUILDS_ROOT / debug",
+      "binaryDir": "$env{CMAKE_BUILDS_ROOT}/BattleOfTheFlatland/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      },
+      "condition": {
+        "type": "notEquals",
+        "lhs": "$env{CMAKE_BUILDS_ROOT}",
+        "rhs": ""
+      }
+    },
+    {
+      "name": "release",
+      "displayName": "CMAKE_BUILDS_ROOT / release",
+      "binaryDir": "$env{CMAKE_BUILDS_ROOT}/BattleOfTheFlatland/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      },
+      "condition": {
+        "type": "notEquals",
+        "lhs": "$env{CMAKE_BUILDS_ROOT}",
+        "rhs": ""
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    },
+    {
+      "name": "vs-default",
+      "configurePreset": "vs-default"
+    }
+  ]
+}
