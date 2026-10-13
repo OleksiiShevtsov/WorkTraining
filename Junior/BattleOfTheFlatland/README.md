@@ -61,6 +61,8 @@ CMake на Windows/LIB собирает protobuf из исходников (`pro
 Visual Studio подхватывает его для **Format Document**.
 
 При обычной сборке CMake сначала гоняет `clang-format` (target `botf_format`), потом компилирует.  
+Только файлы проекта: `*.cpp` / `*.h` / `*.hpp` в `client/`, `server/`, `net/`, `common/sources/`, `tests/`.  
+Не трогает `LIB`, `.proto` и сгенерированные `*.pb.cc`.  
 Нужен `clang-format` в PATH. Отключить:
 
 ```bat
