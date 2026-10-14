@@ -44,15 +44,19 @@ else()
     find_package(GTest QUIET)
 endif()
 
+enable_testing()
+
 # Shared libraries
 add_subdirectory(common/sources ${CMAKE_CURRENT_BINARY_DIR}/common)
 add_subdirectory(common/protobuf ${CMAKE_CURRENT_BINARY_DIR}/proto_messages)
 add_subdirectory(net)
-add_subdirectory(tests)
 
 # Executables (client owns app/, server owns logic/)
 add_subdirectory(server)
 add_subdirectory(client)
+
+# tests after server/client so it can link server_engine + app
+add_subdirectory(tests)
 
 # clang-format before botf_server / botf_client (see cmake/BotfClangFormat.cmake)
 include("${CMAKE_SOURCE_DIR}/cmake/BotfClangFormat.cmake")

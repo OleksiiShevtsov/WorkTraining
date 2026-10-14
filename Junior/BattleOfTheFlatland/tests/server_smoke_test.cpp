@@ -1,26 +1,24 @@
-#include "engine/server_smoke.h"
-
 #include "engine/server_engine.h"
 #include "envelope.pb.h"
+#include "helpers/test_env.h"
 #include "net/packet_framing.hpp"
 #include "net/protocol.hpp"
 #include "world_state.pb.h"
 
 #include <array>
 #include <chrono>
-#include <iostream>
 #include <thread>
 #include <vector>
 
+#include <gtest/gtest.h>
 #include <SFML/Network.hpp>
 
-namespace botf {
 namespace {
 
 constexpr float kDt = 1.0f / 20.0f;
 
 bool sendFramed(sf::TcpSocket& socket, const std::string& envelopeBytes) {
-  const auto packet = net::framePayload(envelopeBytes);
+  const auto packet = botf::net::framePayload(envelopeBytes);
   return socket.send(packet.data(), packet.size()) == sf::Socket::Status::Done;
 }
 
@@ -29,7 +27,7 @@ bool recvOneFrame(sf::TcpSocket& socket,
                   std::string& outPayload,
                   int attempts) {
   for (int i = 0; i < attempts; ++i) {
-    if (auto payload = net::tryConsumeFrame(buffer)) {
+    if (auto payload = botf::net::tryConsumeFrame(buffer)) {
       outPayload = std::move(*payload);
       return true;
     }
@@ -51,19 +49,17 @@ bool recvOneFrame(sf::TcpSocket& socket,
 
 }  // namespace
 
-int runServerSmoke(std::uint16_t port) {
-  ServerEngine engine;
-  if (!engine.startListen(port)) {
-    return 1;
-  }
+TEST(ServerSmoke, MoveTickWorldStateRoundTrip) {
+  const auto port = botf::test::ephemeralPort();
+  ASSERT_TRUE(port.has_value());
+
+  botf::ServerEngine engine;
+  ASSERT_TRUE(engine.startListen(*port));
 
   sf::TcpSocket client;
   client.setBlocking(true);
-  if (client.connect(sf::IpAddress::LocalHost, port, sf::seconds(2)) != sf::Socket::Status::Done) {
-    std::cerr << "[server] smoke client failed to connect\n";
-    engine.shutdown();
-    return 1;
-  }
+  ASSERT_EQ(client.connect(sf::IpAddress::LocalHost, *port, sf::seconds(2)),
+            sf::Socket::Status::Done);
 
   struct Sample {
     int dx;
@@ -78,31 +74,25 @@ int runServerSmoke(std::uint16_t port) {
       {0, 0, 4, 4},
   };
 
+  ASSERT_FALSE(engine.game().objects().empty());
   const auto start = engine.game().objects().front().position();
   std::vector<std::uint8_t> recvBuffer;
 
   for (const auto& sample : samples) {
-    if (!sendFramed(client, net::makeMoveEnvelope(sample.dx, sample.dy, sample.tick, sample.seq))) {
-      std::cerr << "[server] smoke client failed to send Move\n";
-      engine.shutdown();
-      return 1;
-    }
+    ASSERT_TRUE(sendFramed(
+        client, botf::net::makeMoveEnvelope(sample.dx, sample.dy, sample.tick, sample.seq)));
 
     bool got = false;
     for (int i = 0; i < 100 && !got; ++i) {
       engine.pollNetwork();
-      engine.applyInboundMoves(true);
+      engine.applyInboundMoves(false);
       const auto move = engine.lastMove(1);
       if (move && move->tick() == sample.tick) {
         got = true;
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
-    if (!got) {
-      std::cerr << "[server] smoke failed waiting for Move tick=" << sample.tick << '\n';
-      engine.shutdown();
-      return 1;
-    }
+    ASSERT_TRUE(got) << "waiting for Move tick=" << sample.tick;
 
     for (int j = 0; j < 15; ++j) {
       engine.advanceSim(kDt);
@@ -110,7 +100,6 @@ int runServerSmoke(std::uint16_t port) {
     }
   }
 
-  // Last advanceSim already enqueued WorldState; poll to drain outbound.
   for (int i = 0; i < 20; ++i) {
     engine.pollNetwork();
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
@@ -118,7 +107,7 @@ int runServerSmoke(std::uint16_t port) {
 
   client.setBlocking(false);
 
-  WorldState lastState;
+  botf::WorldState lastState;
   bool gotWorld = false;
   for (int i = 0; i < 500; ++i) {
     engine.pollNetwork();
@@ -130,11 +119,11 @@ int runServerSmoke(std::uint16_t port) {
       std::this_thread::sleep_for(std::chrono::milliseconds(2));
       continue;
     }
-    auto envelope = net::parseEnvelope(payload);
-    if (!envelope || envelope->type() != MESSAGE_TYPE_WORLD_STATE) {
+    auto envelope = botf::net::parseEnvelope(payload);
+    if (!envelope || envelope->type() != botf::MESSAGE_TYPE_WORLD_STATE) {
       continue;
     }
-    auto state = net::parseWorldStatePayload(envelope->payload());
+    auto state = botf::net::parseWorldStatePayload(envelope->payload());
     if (!state || state->players_size() == 0) {
       continue;
     }
@@ -145,44 +134,18 @@ int runServerSmoke(std::uint16_t port) {
   client.disconnect();
 
   const auto last = engine.lastMove(1);
-  if (!last || last->tick() != 4 || !net::isIdle(*last)) {
-    std::cerr << "[server] smoke failed: expected last state IDLE tick=4\n";
-    engine.shutdown();
-    return 1;
-  }
+  ASSERT_TRUE(last.has_value());
+  EXPECT_EQ(last->tick(), 4u);
+  EXPECT_TRUE(botf::net::isIdle(*last));
 
   const auto end = engine.game().objects().front().position();
-  std::cout << "[server] logic pos start=(" << start.x << "," << start.y << ") end=(" << end.x
-            << "," << end.y << ")\n";
+  EXPECT_FALSE(end.x == start.x && end.y == start.y) << "DynamicObject did not move";
 
-  if (end.x == start.x && end.y == start.y) {
-    std::cerr << "[server] smoke failed: DynamicObject did not move\n";
-    engine.shutdown();
-    return 1;
-  }
-
-  if (!gotWorld) {
-    std::cerr << "[server] smoke failed: no WorldState received by client\n";
-    engine.shutdown();
-    return 1;
-  }
-
+  ASSERT_TRUE(gotWorld);
   const auto& p0 = lastState.players(0);
   const float dx = p0.position().x() - end.x;
   const float dy = p0.position().y() - end.y;
-  if (dx * dx + dy * dy > 0.01f) {
-    std::cerr << "[server] smoke failed: WorldState pos mismatch " << "wire=(" << p0.position().x()
-              << "," << p0.position().y() << ") " << "logic=(" << end.x << "," << end.y << ")\n";
-    engine.shutdown();
-    return 1;
-  }
+  EXPECT_LE(dx * dx + dy * dy, 0.01f);
 
-  std::cout << "[server] WorldState ok tick=" << lastState.tick()
-            << " players=" << lastState.players_size() << " p0=(" << p0.position().x() << ","
-            << p0.position().y() << ")\n";
-  std::cout << "BattleOfTheFlatland server — smoke ok (Move + GameLogic + WorldState)\n";
   engine.shutdown();
-  return 0;
 }
-
-}  // namespace botf

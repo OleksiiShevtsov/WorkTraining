@@ -11,7 +11,7 @@
 namespace botf {
 
 // Server runtime: TCP + GameLogic tick + WorldState broadcast.
-// main should only parse args and call run() (or runServerSmoke).
+// main should only parse args and call run().
 class ServerEngine {
  public:
   ServerEngine();
@@ -25,7 +25,7 @@ class ServerEngine {
 
   void requestStop();
 
-  // Orchestration steps shared by run() and server smoke.
+  // Orchestration steps shared by run() and integration tests.
   bool startListen(std::uint16_t port);
   void shutdown();
   void pollNetwork();
