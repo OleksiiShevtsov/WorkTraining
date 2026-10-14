@@ -45,7 +45,7 @@ target_link_libraries(${PROJECT_NAME}
     app
     net
     common
-    proto_messages
+    protocol
 )
 
 include(GoogleTest)

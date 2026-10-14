@@ -1,15 +1,14 @@
 #include "engine/server_engine.h"
 
 #include "common/global_settings.hpp"
-#include "envelope.pb.h"
-#include "net/protocol.hpp"
-#include "world_state.pb.h"
+#include "protocol/protocol.hpp"
 
 #include <atomic>
 #include <chrono>
 #include <csignal>
 #include <iostream>
 #include <thread>
+#include <variant>
 
 namespace {
 
@@ -25,18 +24,14 @@ void onSignal(int) {
   }
 }
 
-botf::WorldState buildWorldState(const botf::GameLogic& game, std::uint32_t tick) {
-  botf::WorldState state;
-  state.set_tick(tick);
+botf::common::WorldSnapshot buildWorldSnapshot(const botf::GameLogic& game, std::uint32_t tick) {
+  botf::common::WorldSnapshot snapshot;
+  snapshot.tick = tick;
+  snapshot.players.reserve(game.objects().size());
   for (const auto& obj : game.objects()) {
-    botf::PlayerState* player = state.add_players();
-    player->set_id(obj.id());
-    auto* position = player->mutable_position();
-    position->set_x(obj.position().x);
-    position->set_y(obj.position().y);
-    player->set_aim_angle(obj.angle());
+    snapshot.players.push_back(botf::common::PlayerPose{obj.id(), obj.position(), obj.angle()});
   }
-  return state;
+  return snapshot;
 }
 
 }  // namespace
@@ -83,12 +78,12 @@ std::uint32_t botf::ServerEngine::simTick() const {
   return m_simTick;
 }
 
-std::optional<botf::Move> botf::ServerEngine::lastMove(ClientId clientId) const {
+std::optional<botf::common::MoveCommand> botf::ServerEngine::lastMove(ClientId clientId) const {
   const auto it = m_inputStates.find(clientId);
   if (it == m_inputStates.end()) {
     return std::nullopt;
   }
-  return it->second.move;
+  return it->second.command;
 }
 
 void botf::ServerEngine::ensureClientBound(ClientId clientId) {
@@ -109,36 +104,30 @@ void botf::ServerEngine::ensureClientBound(ClientId clientId) {
 
 void botf::ServerEngine::applyInboundMoves(bool verbose) {
   while (auto note = m_inbound.tryPop()) {
-    Envelope envelope;
-    if (!envelope.ParseFromString(note->payload)) {
+    auto decoded = protocol::decode(note->payload);
+    if (!decoded) {
       std::cerr << "[server] bad envelope from client " << note->clientId << '\n';
       continue;
     }
 
-    if (envelope.type() != MESSAGE_TYPE_MOVE) {
+    const auto* move = std::get_if<protocol::DecodedMove>(&*decoded);
+    if (!move) {
       if (verbose) {
-        std::cout << "[server] ignore type=" << envelope.type() << " from client " << note->clientId
-                  << '\n';
+        std::cout << "[server] ignore non-Move from client " << note->clientId << '\n';
       }
       continue;
     }
 
-    Move move;
-    if (!move.ParseFromString(envelope.payload())) {
-      std::cerr << "[server] bad Move payload from client " << note->clientId << '\n';
-      continue;
-    }
-
-    move = net::normalizeMove(move);
-    m_inputStates[note->clientId] = ClientInputState{move, envelope.sequence()};
+    m_inputStates[note->clientId] = ClientInputState{move->command, move->sequence};
 
     ensureClientBound(note->clientId);
-    m_game.setClientInput(note->clientId, move.dx(), move.dy());
+    m_game.setClientInput(note->clientId, move->command.dx, move->command.dy);
 
     if (verbose) {
-      std::cout << "[server] Move state client=" << note->clientId << " " << net::toString(move)
-                << " dx=" << move.dx() << " dy=" << move.dy() << " tick=" << move.tick()
-                << " seq=" << envelope.sequence() << '\n';
+      std::cout << "[server] Move state client=" << note->clientId << " "
+                << protocol::toString(move->command) << " dx=" << move->command.dx
+                << " dy=" << move->command.dy << " tick=" << move->command.tick
+                << " seq=" << move->sequence << '\n';
     }
   }
 }
@@ -146,7 +135,7 @@ void botf::ServerEngine::applyInboundMoves(bool verbose) {
 void botf::ServerEngine::enqueueWorldState(std::uint32_t tick, std::uint64_t sequence) {
   m_outbound.push(net::OutboundNotification{
       std::nullopt,
-      net::makeWorldStateEnvelope(buildWorldState(m_game, tick), sequence),
+      protocol::encodeWorldSnapshot(buildWorldSnapshot(m_game, tick), sequence),
   });
 }
 

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "common/dto.hpp"
 #include "logic/game_logic.h"
-#include "move.pb.h"
 #include "net/tcp_server.hpp"
 
 #include <cstdint>
@@ -37,11 +37,11 @@ class ServerEngine {
   [[nodiscard]] std::size_t clientCount() const;
   [[nodiscard]] const GameLogic& game() const;
   [[nodiscard]] std::uint32_t simTick() const;
-  [[nodiscard]] std::optional<Move> lastMove(ClientId clientId) const;
+  [[nodiscard]] std::optional<common::MoveCommand> lastMove(ClientId clientId) const;
 
  private:
   struct ClientInputState {
-    Move move{};
+    common::MoveCommand command{};
     std::uint64_t sequence = 0;
   };
 

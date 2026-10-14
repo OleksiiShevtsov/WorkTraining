@@ -113,21 +113,23 @@ cmake --build --preset debug
 BattleOfTheFlatland/
 ├── cmake/
 ├── common/
-│   ├── sources/include/common/
-│   └── protobuf/messages/
-├── net/                 # TcpServer, TcpClient, framing, queues
+│   ├── sources/include/common/   # types + DTO (MoveCommand, WorldSnapshot)
+│   └── protobuf/messages/        # .proto codegen
+├── protocol/            # Envelope codec, MessageType factory, proto ↔ DTO
+├── net/                 # TcpServer, TcpClient, framing, queues (no protobuf)
 ├── server/
 │   ├── engine/          # ServerEngine (tick loop)
-│   └── logic/           # GameLogic / DynamicObject
+│   └── logic/           # GameLogic / DynamicObject (no *.pb.h)
 ├── client/
-│   └── app/             # ClientApp + AppRendering / InputHandler
+│   └── app/             # ClientApp + scene (no *.pb.h)
 └── tests/               # gtest: helpers + smoke (свой main.cpp)
 ```
 
 `main` тонкий: только runtime (`ServerEngine` / `ClientApp`). Smoke живёт в `tests/`.
 
 ```
-Move (client → server) → GameLogic.tick → WorldState (server → clients) → draw
+MoveCommand → protocol encode → net → decode → GameLogic.tick
+  → WorldSnapshot → protocol encode → net → scene
 ```
 
 ## Tests

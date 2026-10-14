@@ -1,43 +1,37 @@
 #include "app/client_app.h"
 
-#include "envelope.pb.h"
-#include "net/protocol.hpp"
+#include "protocol/protocol.hpp"
 
 #include <iostream>
+#include <variant>
 
 #include <SFML/Network.hpp>
 
 botf::app::ClientApp::ClientApp() : m_net(m_inbound, m_outbound) {}
 
-std::vector<botf::app::SceneObject> botf::app::sceneFromWorldState(const WorldState& state) {
+std::vector<botf::app::SceneObject> botf::app::sceneFromSnapshot(
+    const common::WorldSnapshot& snapshot) {
   std::vector<SceneObject> scene;
-  scene.reserve(static_cast<std::size_t>(state.players_size()));
-  for (const auto& player : state.players()) {
-    scene.push_back(SceneObject{
-        player.id(),
-        common::Point{player.position().x(), player.position().y()},
-        player.aim_angle(),
-    });
+  scene.reserve(snapshot.players.size());
+  for (const auto& player : snapshot.players) {
+    scene.push_back(SceneObject{player.id, player.position, player.angle});
   }
   return scene;
 }
 
 void botf::app::ClientApp::applyInbound() {
   while (auto note = m_inbound.tryPop()) {
-    auto envelope = net::parseEnvelope(note->payload);
-    if (!envelope) {
+    auto decoded = protocol::decode(note->payload);
+    if (!decoded) {
       std::cerr << "[client] bad envelope from server\n";
       continue;
     }
-    if (envelope->type() != MESSAGE_TYPE_WORLD_STATE) {
+
+    const auto* world = std::get_if<protocol::DecodedWorldState>(&*decoded);
+    if (!world) {
       continue;
     }
-    auto state = net::parseWorldStatePayload(envelope->payload());
-    if (!state) {
-      std::cerr << "[client] bad WorldState payload\n";
-      continue;
-    }
-    m_latestWorld = std::move(*state);
+    m_latestWorld = world->snapshot;
   }
 }
 
@@ -50,9 +44,10 @@ void botf::app::ClientApp::maybeSendMove(const MoveInput& input, std::uint32_t t
     return;
   }
 
+  const common::MoveCommand command{input.dx, input.dy, tick};
   m_outbound.push(net::OutboundNotification{
       std::nullopt,
-      net::makeMoveEnvelope(input.dx, input.dy, tick, m_sequence),
+      protocol::encodeMove(command, m_sequence),
   });
   m_lastSent = input;
   m_forceSend = false;
@@ -85,7 +80,7 @@ int botf::app::ClientApp::run(std::uint16_t port) {
     applyInbound();
 
     if (m_latestWorld) {
-      m_rendering.setScene(sceneFromWorldState(*m_latestWorld));
+      m_rendering.setScene(sceneFromSnapshot(*m_latestWorld));
     }
 
     m_rendering.draw();

@@ -17,7 +17,7 @@ fi
 echo "[botf] Formatting with:"
 clang-format --version
 
-roots=(client server net common/sources tests)
+roots=(client server net protocol common/sources tests)
 files=()
 for root in "${roots[@]}"; do
   [[ -d "${root}" ]] || continue

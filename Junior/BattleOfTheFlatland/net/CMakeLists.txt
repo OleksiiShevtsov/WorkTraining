@@ -1,6 +1,6 @@
 project(net)
 
-# Transport: SFML TCP + inbound/outbound notification queues + length-prefixed frames.
+# Transport only: SFML TCP + queues + length-prefixed frames. No protobuf.
 
 if(NOT TARGET sfml-network)
     find_package(SFML 2.5 COMPONENTS network system REQUIRED)
@@ -20,7 +20,6 @@ target_include_directories(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         common
-        proto_messages
         sfml-network
         sfml-system
 )

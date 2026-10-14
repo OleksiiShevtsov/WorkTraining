@@ -1,13 +1,12 @@
 #include "engine/server_engine.h"
-#include "envelope.pb.h"
 #include "helpers/test_env.h"
 #include "net/packet_framing.hpp"
-#include "net/protocol.hpp"
-#include "world_state.pb.h"
+#include "protocol/protocol.hpp"
 
 #include <array>
 #include <chrono>
 #include <thread>
+#include <variant>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -80,14 +79,15 @@ TEST(ServerSmoke, MoveTickWorldStateRoundTrip) {
 
   for (const auto& sample : samples) {
     ASSERT_TRUE(sendFramed(
-        client, botf::net::makeMoveEnvelope(sample.dx, sample.dy, sample.tick, sample.seq)));
+        client, botf::protocol::encodeMove(
+                    botf::common::MoveCommand{sample.dx, sample.dy, sample.tick}, sample.seq)));
 
     bool got = false;
     for (int i = 0; i < 100 && !got; ++i) {
       engine.pollNetwork();
       engine.applyInboundMoves(false);
       const auto move = engine.lastMove(1);
-      if (move && move->tick() == sample.tick) {
+      if (move && move->tick == sample.tick) {
         got = true;
       }
       std::this_thread::sleep_for(std::chrono::milliseconds(2));
@@ -107,7 +107,7 @@ TEST(ServerSmoke, MoveTickWorldStateRoundTrip) {
 
   client.setBlocking(false);
 
-  botf::WorldState lastState;
+  botf::common::WorldSnapshot lastSnapshot;
   bool gotWorld = false;
   for (int i = 0; i < 500; ++i) {
     engine.pollNetwork();
@@ -119,15 +119,15 @@ TEST(ServerSmoke, MoveTickWorldStateRoundTrip) {
       std::this_thread::sleep_for(std::chrono::milliseconds(2));
       continue;
     }
-    auto envelope = botf::net::parseEnvelope(payload);
-    if (!envelope || envelope->type() != botf::MESSAGE_TYPE_WORLD_STATE) {
+    auto decoded = botf::protocol::decode(payload);
+    if (!decoded) {
       continue;
     }
-    auto state = botf::net::parseWorldStatePayload(envelope->payload());
-    if (!state || state->players_size() == 0) {
+    const auto* world = std::get_if<botf::protocol::DecodedWorldState>(&*decoded);
+    if (!world || world->snapshot.players.empty()) {
       continue;
     }
-    lastState = std::move(*state);
+    lastSnapshot = world->snapshot;
     gotWorld = true;
   }
 
@@ -135,16 +135,16 @@ TEST(ServerSmoke, MoveTickWorldStateRoundTrip) {
 
   const auto last = engine.lastMove(1);
   ASSERT_TRUE(last.has_value());
-  EXPECT_EQ(last->tick(), 4u);
-  EXPECT_TRUE(botf::net::isIdle(*last));
+  EXPECT_EQ(last->tick, 4u);
+  EXPECT_TRUE(botf::protocol::isIdle(*last));
 
   const auto end = engine.game().objects().front().position();
   EXPECT_FALSE(end.x == start.x && end.y == start.y) << "DynamicObject did not move";
 
   ASSERT_TRUE(gotWorld);
-  const auto& p0 = lastState.players(0);
-  const float dx = p0.position().x() - end.x;
-  const float dy = p0.position().y() - end.y;
+  const auto& p0 = lastSnapshot.players.front();
+  const float dx = p0.position.x - end.x;
+  const float dy = p0.position.y - end.y;
   EXPECT_LE(dx * dx + dy * dy, 0.01f);
 
   engine.shutdown();

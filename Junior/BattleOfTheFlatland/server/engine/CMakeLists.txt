@@ -14,5 +14,5 @@ target_link_libraries(${PROJECT_NAME}
         logic
         net
         common
-        proto_messages
+        protocol
 )

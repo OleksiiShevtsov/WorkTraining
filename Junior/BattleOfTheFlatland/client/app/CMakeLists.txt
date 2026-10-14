@@ -17,7 +17,7 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC
         common
         net
-        proto_messages
+        protocol
         sfml-graphics
         sfml-window
         sfml-system

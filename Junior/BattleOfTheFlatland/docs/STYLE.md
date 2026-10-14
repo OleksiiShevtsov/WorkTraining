@@ -54,8 +54,10 @@ cmake --build build --target botf_format
 
 ## Слои (ориентир)
 
-- `net/` — транспорт (`TcpServer` / `TcpClient`, framing, queues), без геймплея  
-- `logic/` — симуляция, без SFML Network / wire protobuf  
+- `net/` — транспорт (`TcpServer` / `TcpClient`, framing, queues), без protobuf  
+- `protocol/` — Envelope codec + MessageType factory + mappers proto ↔ DTO  
+- `common/` — shared types + DTO (`MoveCommand`, `WorldSnapshot`, …)  
+- `logic/` — симуляция, без SFML Network / `*.pb.h`  
 - `ServerEngine` — серверный loop (tick + broadcast)  
-- `ClientApp` — клиентский loop (input + net + scene)  
+- `ClientApp` — клиентский loop (input + net + scene), без `*.pb.h`  
 - `tests/` — gtest (свой `main.cpp` + `helpers/`); smoke не в runtime main/engine
