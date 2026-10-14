@@ -1,11 +1,9 @@
 #include "app/client_app.h"
 
 #include "envelope.pb.h"
-#include "net/packet_framing.hpp"
 #include "net/protocol.hpp"
 
 #include <iostream>
-#include <vector>
 
 #include <SFML/Network.hpp>
 
@@ -13,7 +11,7 @@ namespace botf::app {
 
 ClientApp::ClientApp() : m_net(m_inbound, m_outbound) {}
 
-std::vector<SceneObject> ClientApp::sceneFromWorldState(const WorldState& state) {
+std::vector<SceneObject> sceneFromWorldState(const WorldState& state) {
   std::vector<SceneObject> scene;
   scene.reserve(static_cast<std::size_t>(state.players_size()));
   for (const auto& player : state.players()) {
@@ -96,53 +94,6 @@ int ClientApp::run(std::uint16_t port) {
   }
 
   m_net.disconnect();
-  return 0;
-}
-
-int ClientApp::runSmoke() {
-  InputHandler input;
-  const auto sample = input.readMoveInput();
-  const auto movePacket = net::framePayload(net::makeMoveEnvelope(sample.dx, sample.dy, 1, 1));
-
-  WorldState state;
-  state.set_tick(42);
-  auto* player = state.add_players();
-  player->set_id(7);
-  player->mutable_position()->set_x(100.f);
-  player->mutable_position()->set_y(300.f);
-  player->set_aim_angle(1.25f);
-
-  const auto framed = net::framePayload(net::makeWorldStateEnvelope(state, /*sequence=*/1));
-
-  std::vector<std::uint8_t> buffer(framed.begin(), framed.end());
-  auto consumed = net::tryConsumeFrame(buffer);
-  if (!consumed) {
-    std::cerr << "[client] smoke failed: could not consume WorldState frame\n";
-    return 1;
-  }
-  auto envelope = net::parseEnvelope(*consumed);
-  if (!envelope || envelope->type() != MESSAGE_TYPE_WORLD_STATE) {
-    std::cerr << "[client] smoke failed: envelope type\n";
-    return 1;
-  }
-  auto parsed = net::parseWorldStatePayload(envelope->payload());
-  if (!parsed || parsed->players_size() != 1) {
-    std::cerr << "[client] smoke failed: WorldState parse\n";
-    return 1;
-  }
-
-  const auto scene = sceneFromWorldState(*parsed);
-  if (scene.size() != 1 || scene[0].id != 7 || scene[0].position.x != 100.f ||
-      scene[0].position.y != 300.f) {
-    std::cerr << "[client] smoke failed: SceneObject mapping\n";
-    return 1;
-  }
-
-  Player localPlayer;
-  localPlayer.setId(1);
-
-  std::cout << "[client] smoke ok sceneId=" << scene[0].id << " movePacket=" << movePacket.size()
-            << " worldPacket=" << framed.size() << " tick=" << parsed->tick() << '\n';
   return 0;
 }
 

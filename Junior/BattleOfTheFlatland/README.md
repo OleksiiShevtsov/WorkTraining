@@ -117,21 +117,38 @@ BattleOfTheFlatland/
 │   └── protobuf/messages/
 ├── net/                 # TcpServer, TcpClient, framing, queues
 ├── server/
-│   ├── engine/          # ServerEngine (tick loop) + runServerSmoke
+│   ├── engine/          # ServerEngine (tick loop)
 │   └── logic/           # GameLogic / DynamicObject
 ├── client/
 │   └── app/             # ClientApp + AppRendering / InputHandler
-└── tests/
+└── tests/               # gtest: helpers + smoke (свой main.cpp)
 ```
 
-`main` тонкий: `ServerEngine` / `ClientApp` (server `--smoke` → `runServerSmoke`).
+`main` тонкий: только runtime (`ServerEngine` / `ClientApp`). Smoke живёт в `tests/`.
 
 ```
 Move (client → server) → GameLogic.tick → WorldState (server → clients) → draw
 ```
 
+## Tests
+
+Нужен GoogleTest (`libgtest-dev` / `LIB/googletest`). Свой entrypoint: `tests/main.cpp`, helpers в `tests/helpers/`.
+
 ```bat
-botf_server --smoke
-botf_client --smoke
+cmake --build --preset debug --target tests
+ctest --test-dir %CMAKE_BUILDS_ROOT%\BattleOfTheFlatland\debug --output-on-failure
+```
+
+или напрямую:
+
+```bat
+%CMAKE_BUILDS_ROOT%\BattleOfTheFlatland\debug\tests\tests.exe
+```
+
+Linux:
+
+```bash
+cmake --build "$CMAKE_BUILDS_ROOT/BattleOfTheFlatland/debug" --target tests
+ctest --test-dir "$CMAKE_BUILDS_ROOT/BattleOfTheFlatland/debug" --output-on-failure
 ```
 

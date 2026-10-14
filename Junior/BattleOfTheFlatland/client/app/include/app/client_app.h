@@ -6,8 +6,11 @@
 
 #include <cstdint>
 #include <optional>
+#include <vector>
 
 namespace botf::app {
+
+[[nodiscard]] std::vector<SceneObject> sceneFromWorldState(const WorldState& state);
 
 // Client runtime: window + input + TcpClient + WorldState → scene.
 class ClientApp {
@@ -20,14 +23,9 @@ class ClientApp {
   // Open window and run until closed. Tries localhost:port.
   int run(std::uint16_t port = 54545);
 
-  // No window: validate WorldState framing → SceneObject mapping.
-  static int runSmoke();
-
  private:
   void applyInbound();
   void maybeSendMove(const MoveInput& input, std::uint32_t tick);
-
-  static std::vector<SceneObject> sceneFromWorldState(const WorldState& state);
 
   net::ClientInboundQueue m_inbound;
   net::OutboundQueue m_outbound;
