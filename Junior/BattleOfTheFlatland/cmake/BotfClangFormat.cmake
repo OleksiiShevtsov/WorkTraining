@@ -17,6 +17,7 @@ set(_botf_format_roots
     "${CMAKE_SOURCE_DIR}/client"
     "${CMAKE_SOURCE_DIR}/server"
     "${CMAKE_SOURCE_DIR}/net"
+    "${CMAKE_SOURCE_DIR}/protocol"
     "${CMAKE_SOURCE_DIR}/common/sources"
     "${CMAKE_SOURCE_DIR}/tests"
 )
@@ -62,7 +63,7 @@ add_custom_target(botf_format
 )
 
 if(BOTF_FORMAT_ON_BUILD)
-    foreach(_botf_tgt IN ITEMS logic app net server_engine botf_server botf_client tests)
+    foreach(_botf_tgt IN ITEMS logic app net protocol server_engine botf_server botf_client tests)
         if(TARGET ${_botf_tgt})
             add_dependencies(${_botf_tgt} botf_format)
         endif()

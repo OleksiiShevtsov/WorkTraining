@@ -1,8 +1,8 @@
 #pragma once
 
 #include "app/app_rendering.h"
+#include "common/dto.hpp"
 #include "net/tcp_client.hpp"
-#include "world_state.pb.h"
 
 #include <cstdint>
 #include <optional>
@@ -10,9 +10,9 @@
 
 namespace botf::app {
 
-[[nodiscard]] std::vector<SceneObject> sceneFromWorldState(const WorldState& state);
+[[nodiscard]] std::vector<SceneObject> sceneFromSnapshot(const common::WorldSnapshot& snapshot);
 
-// Client runtime: window + input + TcpClient + WorldState → scene.
+// Client runtime: window + input + TcpClient + WorldSnapshot → scene.
 class ClientApp {
  public:
   ClientApp();
@@ -35,7 +35,7 @@ class ClientApp {
   std::uint64_t m_sequence = 1;
   MoveInput m_lastSent{};
   bool m_forceSend = true;
-  std::optional<WorldState> m_latestWorld;
+  std::optional<common::WorldSnapshot> m_latestWorld;
 };
 
 }  // namespace botf::app
