@@ -8,7 +8,7 @@
 <parent>/
 ├── WorkTraining/
 │   └── Junior/BattleOfTheFlatland/   ← исходники
-├── LIB/                              ← SFML, googletest, protobuf
+├── LIB/                              ← SFML, googletest, protobuf, spdlog
 └── BUILD/                            ← CMAKE_BUILDS_ROOT указывает сюда
 ```
 
@@ -51,9 +51,17 @@ setup.bat
 ```
 
 Ищет `LIB` рядом с `WorkTraining` (или `BOTF_LIB_ROOT`).  
-Если SFML / googletest / protobuf уже есть — **не клонирует**.  
+Если SFML / googletest / protobuf / spdlog уже есть — **не клонирует**.  
 Protobuf: тег `v21.12` в `%LIB%\protobuf` (битую папку без `CMakeLists.txt` переклонирует).  
-CMake на Windows/LIB собирает protobuf из исходников (`protobuf_BUILD_TESTS=OFF`), без системного `find_package`.
+CMake на Windows/LIB собирает protobuf из исходников (`protobuf_BUILD_TESTS=OFF`), без системного `find_package`.  
+spdlog: `LIB/spdlog` → цветная консоль через `botf::log` (см. ниже).
+
+## Logging
+
+`botf::log::{info,warn,error,debug}` в `common/sources/include/common/log.hpp` — обёртка над spdlog.  
+Только цветной stdout (`stdout_color_mt`), без файлов.  
+Логируем listen / connect / disconnect / ошибки envelope / start-stop server/client.  
+**Не** логируем Move/WorldState каждый тик и ничего из `logic/`.
 
 ## Style
 
@@ -113,7 +121,7 @@ cmake --build --preset debug
 BattleOfTheFlatland/
 ├── cmake/
 ├── common/
-│   ├── sources/include/common/   # types + DTO (MoveCommand, WorldSnapshot)
+│   ├── sources/                  # types, DTO, botf::log (spdlog)
 │   └── protobuf/messages/        # .proto codegen
 ├── protocol/            # Envelope codec, MessageType factory, proto ↔ DTO
 ├── net/                 # TcpServer, TcpClient, framing, queues (no protobuf)

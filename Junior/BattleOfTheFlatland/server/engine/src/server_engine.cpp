@@ -1,12 +1,12 @@
 #include "engine/server_engine.h"
 
 #include "common/global_settings.hpp"
+#include "common/log.hpp"
 #include "protocol/protocol.hpp"
 
 #include <atomic>
 #include <chrono>
 #include <csignal>
-#include <iostream>
 #include <thread>
 #include <variant>
 
@@ -102,19 +102,16 @@ void botf::ServerEngine::ensureClientBound(ClientId clientId) {
 	m_game.bindClient(clientId, entity);
 }
 
-void botf::ServerEngine::applyInboundMoves(bool verbose) {
+void botf::ServerEngine::applyInboundMoves() {
 	while (auto note = m_inbound.tryPop()) {
 		auto decoded = protocol::decode(note->payload);
 		if (!decoded) {
-			std::cerr << "[server] bad envelope from client " << note->clientId << '\n';
+			botf::log::error("[server] bad envelope from client {}", note->clientId);
 			continue;
 		}
 
 		const auto* move = std::get_if<protocol::DecodedMove>(&*decoded);
 		if (!move) {
-			if (verbose) {
-				std::cout << "[server] ignore non-Move from client " << note->clientId << '\n';
-			}
 			continue;
 		}
 
@@ -122,13 +119,6 @@ void botf::ServerEngine::applyInboundMoves(bool verbose) {
 
 		ensureClientBound(note->clientId);
 		m_game.setClientInput(note->clientId, move->command.dx, move->command.dy);
-
-		if (verbose) {
-			std::cout << "[server] Move state client=" << note->clientId << " "
-					  << protocol::toString(move->command) << " dx=" << move->command.dx
-					  << " dy=" << move->command.dy << " tick=" << move->command.tick
-					  << " seq=" << move->sequence << '\n';
-		}
 	}
 }
 
@@ -146,30 +136,16 @@ void botf::ServerEngine::advanceSim(float dt) {
 }
 
 int botf::ServerEngine::runLoop() {
-	std::cout << "[server] running on port " << port() << " at " << kTickHz
-			  << " Hz (Ctrl+C to stop)\n";
-	std::cout << "[server] Move → GameLogic.setClientInput → tick(" << kDt
-			  << ") → WorldState broadcast\n";
+	botf::log::info("[server] running on port {} at {} Hz (Ctrl+C to stop)", port(), kTickHz);
 
 	m_running = true;
 	while (m_running) {
 		const auto tickStart = std::chrono::steady_clock::now();
 
 		pollNetwork();
-		applyInboundMoves(true);
+		applyInboundMoves();
 		advanceSim(kDt);
 		pollNetwork();
-
-		if (m_simTick % static_cast<std::uint32_t>(kTickHz) == 0) {
-			const auto& objects = m_game.objects();
-			std::cout << "[server] heartbeat tick=" << m_simTick << " clients=" << clientCount()
-					  << " entities=" << objects.size();
-			if (!objects.empty()) {
-				const auto p = objects.front().position();
-				std::cout << " p0=(" << p.x << "," << p.y << ")";
-			}
-			std::cout << '\n';
-		}
 
 		const auto elapsed = std::chrono::steady_clock::now() - tickStart;
 		if (elapsed < kTickPeriod) {
@@ -177,11 +153,13 @@ int botf::ServerEngine::runLoop() {
 		}
 	}
 
-	std::cout << "[server] shutting down\n";
+	botf::log::info("[server] shutting down");
 	return 0;
 }
 
 int botf::ServerEngine::run(std::uint16_t port) {
+	botf::log::init();
+
 	gActiveEngine.store(this);
 	std::signal(SIGINT, onSignal);
 	std::signal(SIGTERM, onSignal);

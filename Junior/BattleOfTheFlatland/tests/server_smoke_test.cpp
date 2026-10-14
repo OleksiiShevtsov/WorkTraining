@@ -85,7 +85,7 @@ TEST(ServerSmoke, MoveTickWorldStateRoundTrip) {
 		bool got = false;
 		for (int i = 0; i < 100 && !got; ++i) {
 			engine.pollNetwork();
-			engine.applyInboundMoves(false);
+			engine.applyInboundMoves();
 			const auto move = engine.lastMove(1);
 			if (move && move->tick == sample.tick) {
 				got = true;

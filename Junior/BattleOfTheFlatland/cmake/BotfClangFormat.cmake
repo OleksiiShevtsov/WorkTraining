@@ -63,7 +63,7 @@ add_custom_target(botf_format
 )
 
 if(BOTF_FORMAT_ON_BUILD)
-    foreach(_botf_tgt IN ITEMS logic app net protocol server_engine botf_server botf_client tests)
+    foreach(_botf_tgt IN ITEMS common logic app net protocol server_engine botf_server botf_client tests)
         if(TARGET ${_botf_tgt})
             add_dependencies(${_botf_tgt} botf_format)
         endif()

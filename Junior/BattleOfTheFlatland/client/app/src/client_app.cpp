@@ -1,8 +1,8 @@
 #include "app/client_app.h"
 
+#include "common/log.hpp"
 #include "protocol/protocol.hpp"
 
-#include <iostream>
 #include <variant>
 
 #include <SFML/Network.hpp>
@@ -23,7 +23,7 @@ void botf::app::ClientApp::applyInbound() {
 	while (auto note = m_inbound.tryPop()) {
 		auto decoded = protocol::decode(note->payload);
 		if (!decoded) {
-			std::cerr << "[client] bad envelope from server\n";
+			botf::log::error("[client] bad envelope from server");
 			continue;
 		}
 
@@ -55,13 +55,15 @@ void botf::app::ClientApp::maybeSendMove(const MoveInput& input, std::uint32_t t
 }
 
 int botf::app::ClientApp::run(std::uint16_t port) {
+	botf::log::init();
+
 	m_rendering.player().setId(0);
 
 	if (!m_net.connect(sf::IpAddress::LocalHost, port, sf::seconds(1))) {
-		std::cerr << "[client] server not available on " << port
-				  << " — UI only (Move/WorldState offline)\n";
+		botf::log::warn("[client] server not available on {} — UI only (Move/WorldState offline)",
+						port);
 	} else {
-		std::cout << "[client] connected to server\n";
+		botf::log::info("[client] connected to server");
 	}
 
 	std::uint32_t tick = 1;
@@ -73,7 +75,7 @@ int botf::app::ClientApp::run(std::uint16_t port) {
 		if (m_net.isConnected()) {
 			m_net.poll();
 			if (!m_net.isConnected()) {
-				std::cerr << "[client] disconnected from server\n";
+				botf::log::warn("[client] disconnected from server");
 			}
 		}
 
