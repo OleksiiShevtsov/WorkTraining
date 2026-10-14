@@ -54,6 +54,9 @@ if errorlevel 1 goto :fail
 call :ensure_dep googletest "https://github.com/google/googletest.git"
 if errorlevel 1 goto :fail
 
+call :ensure_dep spdlog "https://github.com/gabime/spdlog.git"
+if errorlevel 1 goto :fail
+
 call :ensure_protobuf
 if errorlevel 1 goto :fail
 
@@ -61,6 +64,7 @@ popd
 echo [botf] Done.
 echo [botf] LIB=%LIB_DIR%
 echo [botf] protobuf=%LIB_DIR%\protobuf  (tag %PROTOBUF_TAG%)
+echo [botf] spdlog=%LIB_DIR%\spdlog
 if defined CMAKE_BUILDS_ROOT (
   echo [botf] CMAKE_BUILDS_ROOT=%CMAKE_BUILDS_ROOT%
   echo [botf] Use preset: cmake --preset debug
@@ -82,6 +86,7 @@ if exist "%~1\SFML\" set "LIB_OK=1"
 if exist "%~1\sfml\" set "LIB_OK=1"
 if exist "%~1\googletest\" set "LIB_OK=1"
 if exist "%~1\protobuf\" set "LIB_OK=1"
+if exist "%~1\spdlog\" set "LIB_OK=1"
 if exist "%~1\README.md" set "LIB_OK=1"
 exit /b 0
 

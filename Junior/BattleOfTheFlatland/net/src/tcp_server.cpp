@@ -1,9 +1,9 @@
 #include "net/tcp_server.hpp"
 
+#include "common/log.hpp"
 #include "net/packet_framing.hpp"
 
 #include <array>
-#include <iostream>
 #include <utility>
 
 namespace {
@@ -26,14 +26,14 @@ bool botf::net::TcpServer::listen(std::uint16_t port) {
 
 	m_listener.setBlocking(false);
 	if (m_listener.listen(port) != sf::Socket::Status::Done) {
-		std::cerr << "[net] failed to listen on port " << port << '\n';
+		botf::log::error("[net] failed to listen on port {}", port);
 		return false;
 	}
 
 	m_selector.add(m_listener);
 	m_port = port;
 	m_listening = true;
-	std::cout << "[net] listening on port " << m_port << '\n';
+	botf::log::info("[net] listening on port {}", m_port);
 	return true;
 }
 
@@ -89,7 +89,7 @@ void botf::net::TcpServer::acceptNewClients() {
 	client.socket = std::move(socket);
 	m_clients.emplace(id, std::move(client));
 
-	std::cout << "[net] client connected id=" << id << " (total " << m_clients.size() << ")\n";
+	botf::log::info("[net] client connected id={} (total {})", id, m_clients.size());
 }
 
 void botf::net::TcpServer::receiveFromClients() {
@@ -187,5 +187,5 @@ void botf::net::TcpServer::dropClient(botf::ClientId id) {
 	m_selector.remove(*it->second.socket);
 	it->second.socket->disconnect();
 	m_clients.erase(it);
-	std::cout << "[net] client disconnected id=" << id << " (total " << m_clients.size() << ")\n";
+	botf::log::info("[net] client disconnected id={} (total {})", id, m_clients.size());
 }

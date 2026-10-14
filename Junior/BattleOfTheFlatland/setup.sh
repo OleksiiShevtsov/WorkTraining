@@ -11,7 +11,7 @@ PROTOBUF_URL="https://github.com/protocolbuffers/protobuf.git"
 
 lib_looks_ok() {
   local d="$1"
-  [[ -d "${d}/SFML" || -d "${d}/sfml" || -d "${d}/googletest" || -d "${d}/protobuf" || -f "${d}/README.md" ]]
+  [[ -d "${d}/SFML" || -d "${d}/sfml" || -d "${d}/googletest" || -d "${d}/protobuf" || -d "${d}/spdlog" || -f "${d}/README.md" ]]
 }
 
 if [[ -n "${BOTF_LIB_ROOT:-}" ]]; then
@@ -92,15 +92,17 @@ ensure_protobuf() {
 
 clone_if_missing SFML https://github.com/SFML/SFML.git
 clone_if_missing googletest https://github.com/google/googletest.git
+clone_if_missing spdlog https://github.com/gabime/spdlog.git
 ensure_protobuf
 
 if command -v apt-get >/dev/null 2>&1; then
-  echo "[botf] Optional: sudo apt-get install -y libsfml-dev protobuf-compiler libprotobuf-dev"
+  echo "[botf] Optional: sudo apt-get install -y libsfml-dev protobuf-compiler libprotobuf-dev libspdlog-dev"
 fi
 
 echo "[botf] Done."
 echo "[botf] LIB=${LIB_DIR}"
 echo "[botf] protobuf=${LIB_DIR}/protobuf  (tag ${PROTOBUF_TAG})"
+echo "[botf] spdlog=${LIB_DIR}/spdlog"
 if [[ -n "${CMAKE_BUILDS_ROOT:-}" ]]; then
   echo "[botf] CMAKE_BUILDS_ROOT=${CMAKE_BUILDS_ROOT}"
   echo "[botf] Use preset: cmake --preset debug"

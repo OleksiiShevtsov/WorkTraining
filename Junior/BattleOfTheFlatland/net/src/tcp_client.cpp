@@ -1,9 +1,9 @@
 #include "net/tcp_client.hpp"
 
+#include "common/log.hpp"
 #include "net/packet_framing.hpp"
 
 #include <array>
-#include <iostream>
 
 namespace {
 
@@ -73,7 +73,7 @@ void botf::net::TcpClient::receiveInbound() {
 		const auto status = m_socket.receive(chunk.data(), chunk.size(), received);
 
 		if (status == sf::Socket::Status::Disconnected || status == sf::Socket::Status::Error) {
-			std::cerr << "[net] client disconnected from server\n";
+			botf::log::warn("[net] client disconnected from server");
 			disconnect();
 			return;
 		}
@@ -98,7 +98,7 @@ void botf::net::TcpClient::flushSendBuffer() {
 		const auto status = m_socket.send(m_sendBuffer.data(), m_sendBuffer.size(), sent);
 
 		if (status == sf::Socket::Status::Disconnected || status == sf::Socket::Status::Error) {
-			std::cerr << "[net] client send failed — disconnecting\n";
+			botf::log::error("[net] client send failed — disconnecting");
 			disconnect();
 			return;
 		}

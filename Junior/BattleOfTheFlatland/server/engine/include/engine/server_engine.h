@@ -29,7 +29,7 @@ public:
 	bool startListen(std::uint16_t port);
 	void shutdown();
 	void pollNetwork();
-	void applyInboundMoves(bool verbose = false);
+	void applyInboundMoves();
 	// game.tick(dt) + enqueue WorldState for the new sim tick.
 	void advanceSim(float dt);
 
