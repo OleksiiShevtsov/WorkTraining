@@ -62,7 +62,7 @@ CMake на Windows/LIB собирает protobuf из исходников (`pro
 
 ## Format
 
-В корне лежит `.clang-format` (стиль Google, 2 пробела, колонка 100).  
+В корне лежит `.clang-format` (стиль Google, отступ — таб width 4, колонка 100).  
 Visual Studio подхватывает его для **Format Document**.
 
 При обычной сборке CMake сначала гоняет `clang-format` (target `botf_format`), потом компилирует.  

@@ -43,7 +43,7 @@ botf::common::ID botf::DynamicObject::id() const { return m_id; }
 
 ## Форматирование
 
-Корень проекта: `.clang-format` (Google-based, 2 spaces, column 100).  
+Корень проекта: `.clang-format` (Google-based, **табы** width 4, column 100).  
 При сборке target `botf_format` прогоняет `*.cpp` / `*.h` / `*.hpp` модулей проекта.
 
 ```bash

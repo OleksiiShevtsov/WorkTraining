@@ -3,11 +3,11 @@
 #include <gtest/gtest.h>
 
 TEST(TestEnvironment, HelpersCompileAndLink) {
-  SUCCEED();
+	SUCCEED();
 }
 
 TEST(TestEnvironment, EphemeralPortAvailable) {
-  const auto port = botf::test::ephemeralPort();
-  ASSERT_TRUE(port.has_value());
-  EXPECT_GT(*port, 0);
+	const auto port = botf::test::ephemeralPort();
+	ASSERT_TRUE(port.has_value());
+	EXPECT_GT(*port, 0);
 }

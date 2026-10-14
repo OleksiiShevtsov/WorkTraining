@@ -1,4 +1,4 @@
-# BattleOfTheFlatland — matches existing sources (2-space, Attach braces).
+# BattleOfTheFlatland — tab indentation (width 4), Attach braces.
 # Visual Studio: enables Format Document with ClangFormat when this file is present.
 #
 # Naming (not enforced by clang-format — see docs/STYLE.md):
@@ -10,12 +10,12 @@
 BasedOnStyle: Google
 Language: Cpp
 
-IndentWidth: 2
-TabWidth: 2
-UseTab: Never
+IndentWidth: 4
+TabWidth: 4
+UseTab: Always
 ColumnLimit: 100
 
-AccessModifierOffset: -1
+AccessModifierOffset: -4
 NamespaceIndentation: None
 FixNamespaceComments: true
 
