@@ -14,8 +14,8 @@ using ID = std::uint32_t;
 using Angle = float;
 
 struct Point {
-  Coordinate x{};
-  Coordinate y{};
+	Coordinate x{};
+	Coordinate y{};
 };
 
 }  // namespace common

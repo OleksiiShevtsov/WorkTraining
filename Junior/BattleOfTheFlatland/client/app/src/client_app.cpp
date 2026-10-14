@@ -10,82 +10,82 @@
 botf::app::ClientApp::ClientApp() : m_net(m_inbound, m_outbound) {}
 
 std::vector<botf::app::SceneObject> botf::app::sceneFromSnapshot(
-    const common::WorldSnapshot& snapshot) {
-  std::vector<SceneObject> scene;
-  scene.reserve(snapshot.players.size());
-  for (const auto& player : snapshot.players) {
-    scene.push_back(SceneObject{player.id, player.position, player.angle});
-  }
-  return scene;
+	const common::WorldSnapshot& snapshot) {
+	std::vector<SceneObject> scene;
+	scene.reserve(snapshot.players.size());
+	for (const auto& player : snapshot.players) {
+		scene.push_back(SceneObject{player.id, player.position, player.angle});
+	}
+	return scene;
 }
 
 void botf::app::ClientApp::applyInbound() {
-  while (auto note = m_inbound.tryPop()) {
-    auto decoded = protocol::decode(note->payload);
-    if (!decoded) {
-      std::cerr << "[client] bad envelope from server\n";
-      continue;
-    }
+	while (auto note = m_inbound.tryPop()) {
+		auto decoded = protocol::decode(note->payload);
+		if (!decoded) {
+			std::cerr << "[client] bad envelope from server\n";
+			continue;
+		}
 
-    const auto* world = std::get_if<protocol::DecodedWorldState>(&*decoded);
-    if (!world) {
-      continue;
-    }
-    m_latestWorld = world->snapshot;
-  }
+		const auto* world = std::get_if<protocol::DecodedWorldState>(&*decoded);
+		if (!world) {
+			continue;
+		}
+		m_latestWorld = world->snapshot;
+	}
 }
 
 void botf::app::ClientApp::maybeSendMove(const MoveInput& input, std::uint32_t tick) {
-  if (!m_net.isConnected()) {
-    return;
-  }
-  if (!(m_forceSend || input.dx != m_lastSent.dx || input.dy != m_lastSent.dy ||
-        (tick % 3u) == 0u)) {
-    return;
-  }
+	if (!m_net.isConnected()) {
+		return;
+	}
+	if (!(m_forceSend || input.dx != m_lastSent.dx || input.dy != m_lastSent.dy ||
+		  (tick % 3u) == 0u)) {
+		return;
+	}
 
-  const common::MoveCommand command{input.dx, input.dy, tick};
-  m_outbound.push(net::OutboundNotification{
-      std::nullopt,
-      protocol::encodeMove(command, m_sequence),
-  });
-  m_lastSent = input;
-  m_forceSend = false;
-  ++m_sequence;
+	const common::MoveCommand command{input.dx, input.dy, tick};
+	m_outbound.push(net::OutboundNotification{
+		std::nullopt,
+		protocol::encodeMove(command, m_sequence),
+	});
+	m_lastSent = input;
+	m_forceSend = false;
+	++m_sequence;
 }
 
 int botf::app::ClientApp::run(std::uint16_t port) {
-  m_rendering.player().setId(0);
+	m_rendering.player().setId(0);
 
-  if (!m_net.connect(sf::IpAddress::LocalHost, port, sf::seconds(1))) {
-    std::cerr << "[client] server not available on " << port
-              << " — UI only (Move/WorldState offline)\n";
-  } else {
-    std::cout << "[client] connected to server\n";
-  }
+	if (!m_net.connect(sf::IpAddress::LocalHost, port, sf::seconds(1))) {
+		std::cerr << "[client] server not available on " << port
+				  << " — UI only (Move/WorldState offline)\n";
+	} else {
+		std::cout << "[client] connected to server\n";
+	}
 
-  std::uint32_t tick = 1;
-  while (m_rendering.isWindowOpen()) {
-    const MoveInput input = m_rendering.inputHandler().readMoveInput();
-    maybeSendMove(input, tick);
-    ++tick;
+	std::uint32_t tick = 1;
+	while (m_rendering.isWindowOpen()) {
+		const MoveInput input = m_rendering.inputHandler().readMoveInput();
+		maybeSendMove(input, tick);
+		++tick;
 
-    if (m_net.isConnected()) {
-      m_net.poll();
-      if (!m_net.isConnected()) {
-        std::cerr << "[client] disconnected from server\n";
-      }
-    }
+		if (m_net.isConnected()) {
+			m_net.poll();
+			if (!m_net.isConnected()) {
+				std::cerr << "[client] disconnected from server\n";
+			}
+		}
 
-    applyInbound();
+		applyInbound();
 
-    if (m_latestWorld) {
-      m_rendering.setScene(sceneFromSnapshot(*m_latestWorld));
-    }
+		if (m_latestWorld) {
+			m_rendering.setScene(sceneFromSnapshot(*m_latestWorld));
+		}
 
-    m_rendering.draw();
-  }
+		m_rendering.draw();
+	}
 
-  m_net.disconnect();
-  return 0;
+	m_net.disconnect();
+	return 0;
 }

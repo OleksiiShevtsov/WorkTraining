@@ -14,28 +14,28 @@ namespace botf::app {
 
 // Client runtime: window + input + TcpClient + WorldSnapshot → scene.
 class ClientApp {
- public:
-  ClientApp();
+public:
+	ClientApp();
 
-  ClientApp(const ClientApp&) = delete;
-  ClientApp& operator=(const ClientApp&) = delete;
+	ClientApp(const ClientApp&) = delete;
+	ClientApp& operator=(const ClientApp&) = delete;
 
-  // Open window and run until closed. Tries localhost:port.
-  int run(std::uint16_t port = 54545);
+	// Open window and run until closed. Tries localhost:port.
+	int run(std::uint16_t port = 54545);
 
- private:
-  void applyInbound();
-  void maybeSendMove(const MoveInput& input, std::uint32_t tick);
+private:
+	void applyInbound();
+	void maybeSendMove(const MoveInput& input, std::uint32_t tick);
 
-  net::ClientInboundQueue m_inbound;
-  net::OutboundQueue m_outbound;
-  net::TcpClient m_net;
-  AppRendering m_rendering;
+	net::ClientInboundQueue m_inbound;
+	net::OutboundQueue m_outbound;
+	net::TcpClient m_net;
+	AppRendering m_rendering;
 
-  std::uint64_t m_sequence = 1;
-  MoveInput m_lastSent{};
-  bool m_forceSend = true;
-  std::optional<common::WorldSnapshot> m_latestWorld;
+	std::uint64_t m_sequence = 1;
+	MoveInput m_lastSent{};
+	bool m_forceSend = true;
+	std::optional<common::WorldSnapshot> m_latestWorld;
 };
 
 }  // namespace botf::app

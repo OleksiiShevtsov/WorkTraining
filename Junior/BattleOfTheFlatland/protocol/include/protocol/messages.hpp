@@ -8,13 +8,13 @@
 namespace botf::protocol {
 
 struct DecodedMove {
-  common::MoveCommand command{};
-  std::uint64_t sequence{};
+	common::MoveCommand command{};
+	std::uint64_t sequence{};
 };
 
 struct DecodedWorldState {
-  common::WorldSnapshot snapshot{};
-  std::uint64_t sequence{};
+	common::WorldSnapshot snapshot{};
+	std::uint64_t sequence{};
 };
 
 // Extensible: add Hello / Input here without touching net framing.
