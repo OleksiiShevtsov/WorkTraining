@@ -2,9 +2,7 @@
 
 #include <SFML/Window/Keyboard.hpp>
 
-namespace botf::app {
-
-MoveInput InputHandler::readMoveInput() const {
+botf::app::MoveInput botf::app::InputHandler::readMoveInput() const {
   MoveInput input{};
 
   const bool up = sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up) ||
@@ -45,5 +43,3 @@ MoveInput InputHandler::readMoveInput() const {
 
   return input;
 }
-
-}  // namespace botf::app

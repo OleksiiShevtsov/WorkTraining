@@ -2,26 +2,24 @@
 
 #include "common/global_settings.hpp"
 
-namespace botf {
-
-GameLogic::GameLogic() {
+botf::GameLogic::GameLogic() {
   const common::ID id = spawnPlayer(
       common::Point{common::GlobalSettings::defaultSpawnX, common::GlobalSettings::defaultSpawnY},
       common::GlobalSettings::defaultPlayerSpeedLimit);
   (void)id;
 }
 
-common::ID GameLogic::spawnPlayer(common::Point at, float speedLimit) {
+botf::common::ID botf::GameLogic::spawnPlayer(common::Point at, float speedLimit) {
   const common::ID id = m_nextEntityId++;
   m_objects.emplace_back(id, at, speedLimit);
   return id;
 }
 
-void GameLogic::bindClient(ClientId clientId, common::ID entityId) {
+void botf::GameLogic::bindClient(ClientId clientId, common::ID entityId) {
   m_clientToEntity[clientId] = entityId;
 }
 
-void GameLogic::setClientInput(ClientId clientId, int dx, int dy) {
+void botf::GameLogic::setClientInput(ClientId clientId, int dx, int dy) {
   const auto it = m_clientToEntity.find(clientId);
   if (it == m_clientToEntity.end()) {
     return;
@@ -29,23 +27,23 @@ void GameLogic::setClientInput(ClientId clientId, int dx, int dy) {
   setPlayerInput(it->second, dx, dy);
 }
 
-void GameLogic::setPlayerInput(common::ID entityId, int dx, int dy) {
+void botf::GameLogic::setPlayerInput(common::ID entityId, int dx, int dy) {
   if (DynamicObject* obj = findMutable(entityId)) {
     obj->setInput(dx, dy);
   }
 }
 
-void GameLogic::tick(float dt) {
+void botf::GameLogic::tick(float dt) {
   for (auto& obj : m_objects) {
     obj.update(dt);
   }
 }
 
-const std::vector<DynamicObject>& GameLogic::objects() const {
+const std::vector<botf::DynamicObject>& botf::GameLogic::objects() const {
   return m_objects;
 }
 
-std::optional<common::ID> GameLogic::entityForClient(ClientId clientId) const {
+std::optional<botf::common::ID> botf::GameLogic::entityForClient(ClientId clientId) const {
   const auto it = m_clientToEntity.find(clientId);
   if (it == m_clientToEntity.end()) {
     return std::nullopt;
@@ -53,7 +51,7 @@ std::optional<common::ID> GameLogic::entityForClient(ClientId clientId) const {
   return it->second;
 }
 
-DynamicObject* GameLogic::findMutable(common::ID entityId) {
+botf::DynamicObject* botf::GameLogic::findMutable(common::ID entityId) {
   for (auto& obj : m_objects) {
     if (obj.id() == entityId) {
       return &obj;
@@ -61,5 +59,3 @@ DynamicObject* GameLogic::findMutable(common::ID entityId) {
   }
   return nullptr;
 }
-
-}  // namespace botf

@@ -2,9 +2,7 @@
 
 #include "common/global_settings.hpp"
 
-namespace botf::app {
-
-AppRendering::AppRendering()
+botf::app::AppRendering::AppRendering()
 #if SFML_VERSION_MAJOR >= 3
     : m_window{std::make_shared<sf::RenderWindow>(
           sf::VideoMode({static_cast<unsigned int>(common::GlobalSettings::sizeWindowX),
@@ -19,27 +17,29 @@ AppRendering::AppRendering()
   m_window->setFramerateLimit(60);
 }
 
-Player& AppRendering::player() {
+botf::app::Player& botf::app::AppRendering::player() {
   return m_player;
 }
 
-const Player& AppRendering::player() const {
+const botf::app::Player& botf::app::AppRendering::player() const {
   return m_player;
 }
 
-InputHandler& AppRendering::inputHandler() {
+botf::app::InputHandler& botf::app::AppRendering::inputHandler() {
   return m_inputHandler;
 }
 
-const InputHandler& AppRendering::inputHandler() const {
+const botf::app::InputHandler& botf::app::AppRendering::inputHandler() const {
   return m_inputHandler;
 }
 
-void AppRendering::clearScene() {
+void botf::app::AppRendering::clearScene() {
   m_scene.clear();
 }
 
-void AppRendering::setSceneObject(common::ID id, common::Point position, common::Angle angle) {
+void botf::app::AppRendering::setSceneObject(common::ID id,
+                                             common::Point position,
+                                             common::Angle angle) {
   for (auto& obj : m_scene) {
     if (obj.id == id) {
       obj.position = position;
@@ -50,15 +50,15 @@ void AppRendering::setSceneObject(common::ID id, common::Point position, common:
   m_scene.push_back(SceneObject{id, position, angle});
 }
 
-void AppRendering::setScene(std::vector<SceneObject> objects) {
+void botf::app::AppRendering::setScene(std::vector<SceneObject> objects) {
   m_scene = std::move(objects);
 }
 
-bool AppRendering::isWindowOpen() const {
+bool botf::app::AppRendering::isWindowOpen() const {
   return m_window && m_window->isOpen();
 }
 
-void AppRendering::draw() {
+void botf::app::AppRendering::draw() {
   if (!m_window) {
     return;
   }
@@ -87,11 +87,11 @@ void AppRendering::draw() {
   m_scene.clear();
 }
 
-void AppRendering::drawMap() {
+void botf::app::AppRendering::drawMap() {
   // Map rendering later.
 }
 
-void AppRendering::drawSceneObjects() {
+void botf::app::AppRendering::drawSceneObjects() {
   for (const auto& el : m_scene) {
     sf::CircleShape circle(10.f);
     circle.setFillColor(sf::Color(120, 20, 20));
@@ -105,5 +105,3 @@ void AppRendering::drawSceneObjects() {
     m_window->draw(circle);
   }
 }
-
-}  // namespace botf::app

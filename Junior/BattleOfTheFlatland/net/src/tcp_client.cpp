@@ -5,7 +5,6 @@
 #include <array>
 #include <iostream>
 
-namespace botf::net {
 namespace {
 
 void appendBytes(std::vector<std::uint8_t>& dst, const std::vector<std::uint8_t>& src) {
@@ -14,14 +13,14 @@ void appendBytes(std::vector<std::uint8_t>& dst, const std::vector<std::uint8_t>
 
 }  // namespace
 
-TcpClient::TcpClient(ClientInboundQueue& inbound, OutboundQueue& outbound)
+botf::net::TcpClient::TcpClient(ClientInboundQueue& inbound, OutboundQueue& outbound)
     : m_inbound(inbound), m_outbound(outbound) {}
 
-TcpClient::~TcpClient() {
+botf::net::TcpClient::~TcpClient() {
   disconnect();
 }
 
-bool TcpClient::connect(sf::IpAddress host, std::uint16_t port, sf::Time timeout) {
+bool botf::net::TcpClient::connect(sf::IpAddress host, std::uint16_t port, sf::Time timeout) {
   disconnect();
 
   m_socket.setBlocking(true);
@@ -38,7 +37,7 @@ bool TcpClient::connect(sf::IpAddress host, std::uint16_t port, sf::Time timeout
   return true;
 }
 
-void TcpClient::disconnect() {
+void botf::net::TcpClient::disconnect() {
   if (!m_connected && m_sendBuffer.empty() && m_recvBuffer.empty()) {
     m_socket.disconnect();
     return;
@@ -50,7 +49,7 @@ void TcpClient::disconnect() {
   m_sendBuffer.clear();
 }
 
-void TcpClient::poll() {
+void botf::net::TcpClient::poll() {
   if (!m_connected) {
     return;
   }
@@ -60,14 +59,14 @@ void TcpClient::poll() {
   flushSendBuffer();
 }
 
-void TcpClient::dispatchOutbound() {
+void botf::net::TcpClient::dispatchOutbound() {
   while (auto note = m_outbound.tryPop()) {
     // Client ignores targeting; every outbound goes to the connected server.
     appendBytes(m_sendBuffer, framePayload(note->payload));
   }
 }
 
-void TcpClient::receiveInbound() {
+void botf::net::TcpClient::receiveInbound() {
   while (m_connected) {
     std::array<char, 4096> chunk{};
     std::size_t received = 0;
@@ -93,7 +92,7 @@ void TcpClient::receiveInbound() {
   }
 }
 
-void TcpClient::flushSendBuffer() {
+void botf::net::TcpClient::flushSendBuffer() {
   while (m_connected && !m_sendBuffer.empty()) {
     std::size_t sent = 0;
     const auto status = m_socket.send(m_sendBuffer.data(), m_sendBuffer.size(), sent);
@@ -117,5 +116,3 @@ void TcpClient::flushSendBuffer() {
     }
   }
 }
-
-}  // namespace botf::net

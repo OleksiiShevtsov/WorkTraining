@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cmath>
 
-namespace botf {
 namespace {
 
 int clampAxis(int value) {
@@ -12,46 +11,46 @@ int clampAxis(int value) {
 
 }  // namespace
 
-DynamicObject::DynamicObject(common::ID id, common::Point dot, float speedLimit)
+botf::DynamicObject::DynamicObject(common::ID id, common::Point dot, float speedLimit)
     : m_id{id}, m_position{dot}, m_angle{0.0f}, m_speedLimit{speedLimit} {
   m_movement.initialX = m_position.x;
   m_movement.initialY = m_position.y;
 }
 
-common::ID DynamicObject::id() const {
+botf::common::ID botf::DynamicObject::id() const {
   return m_id;
 }
 
-common::Point DynamicObject::position() const {
+botf::common::Point botf::DynamicObject::position() const {
   return m_position;
 }
 
-common::Angle DynamicObject::angle() const {
+botf::common::Angle botf::DynamicObject::angle() const {
   return m_angle;
 }
 
-int DynamicObject::inputDx() const {
+int botf::DynamicObject::inputDx() const {
   return m_inputDx;
 }
 
-int DynamicObject::inputDy() const {
+int botf::DynamicObject::inputDy() const {
   return m_inputDy;
 }
 
-void DynamicObject::setPosition(common::Point dot) {
+void botf::DynamicObject::setPosition(common::Point dot) {
   m_position = dot;
 }
 
-void DynamicObject::setAngle(common::Angle alpha) {
+void botf::DynamicObject::setAngle(common::Angle alpha) {
   m_angle = alpha;
 }
 
-void DynamicObject::setInput(int dx, int dy) {
+void botf::DynamicObject::setInput(int dx, int dy) {
   m_inputDx = clampAxis(dx);
   m_inputDy = clampAxis(dy);
 }
 
-float DynamicObject::speedRecalculation(float acceleration, float initialSpeed) const {
+float botf::DynamicObject::speedRecalculation(float acceleration, float initialSpeed) const {
   float speed = acceleration * m_movement.currentTime + initialSpeed;
   if (m_speedLimit > 0.0f) {
     speed = std::clamp(speed, -m_speedLimit, m_speedLimit);
@@ -59,13 +58,13 @@ float DynamicObject::speedRecalculation(float acceleration, float initialSpeed) 
   return speed;
 }
 
-common::Coordinate DynamicObject::coordinateRecalculation(
+botf::common::Coordinate botf::DynamicObject::coordinateRecalculation(
     float acceleration, float initialSpeed, common::Coordinate initialCoordinate) const {
   return acceleration * m_movement.currentTime * m_movement.currentTime / 2.0f +
          initialSpeed * m_movement.currentTime + initialCoordinate;
 }
 
-void DynamicObject::resetEndpoints() {
+void botf::DynamicObject::resetEndpoints() {
   const float speedMag =
       std::sqrt(m_movement.speedX * m_movement.speedX + m_movement.speedY * m_movement.speedY);
   if (speedMag > kSpeedEpsilon) {
@@ -91,7 +90,7 @@ void DynamicObject::resetEndpoints() {
   m_movement.currentTime = 0.0f;
 }
 
-void DynamicObject::update(float dt) {
+void botf::DynamicObject::update(float dt) {
   if (dt <= 0.0f) {
     return;
   }
@@ -148,5 +147,3 @@ void DynamicObject::update(float dt) {
                                            m_movement.initialSpeedY, m_movement.initialY);
   }
 }
-
-}  // namespace botf

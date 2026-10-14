@@ -6,7 +6,6 @@
 #include <iostream>
 #include <utility>
 
-namespace botf::net {
 namespace {
 
 void appendBytes(std::vector<std::uint8_t>& dst, const std::vector<std::uint8_t>& src) {
@@ -15,14 +14,14 @@ void appendBytes(std::vector<std::uint8_t>& dst, const std::vector<std::uint8_t>
 
 }  // namespace
 
-TcpServer::TcpServer(InboundQueue& inbound, OutboundQueue& outbound)
+botf::net::TcpServer::TcpServer(InboundQueue& inbound, OutboundQueue& outbound)
     : m_inbound(inbound), m_outbound(outbound) {}
 
-TcpServer::~TcpServer() {
+botf::net::TcpServer::~TcpServer() {
   stop();
 }
 
-bool TcpServer::listen(std::uint16_t port) {
+bool botf::net::TcpServer::listen(std::uint16_t port) {
   stop();
 
   m_listener.setBlocking(false);
@@ -38,7 +37,7 @@ bool TcpServer::listen(std::uint16_t port) {
   return true;
 }
 
-void TcpServer::stop() {
+void botf::net::TcpServer::stop() {
   if (!m_listening && m_clients.empty()) {
     return;
   }
@@ -56,7 +55,7 @@ void TcpServer::stop() {
   m_port = 0;
 }
 
-void TcpServer::poll() {
+void botf::net::TcpServer::poll() {
   if (!m_listening) {
     return;
   }
@@ -71,7 +70,7 @@ void TcpServer::poll() {
   flushSendBuffers();
 }
 
-void TcpServer::acceptNewClients() {
+void botf::net::TcpServer::acceptNewClients() {
   if (!m_selector.isReady(m_listener)) {
     return;
   }
@@ -93,7 +92,7 @@ void TcpServer::acceptNewClients() {
   std::cout << "[net] client connected id=" << id << " (total " << m_clients.size() << ")\n";
 }
 
-void TcpServer::receiveFromClients() {
+void botf::net::TcpServer::receiveFromClients() {
   std::vector<botf::ClientId> toDrop;
 
   for (auto& [id, client] : m_clients) {
@@ -125,7 +124,7 @@ void TcpServer::receiveFromClients() {
   }
 }
 
-void TcpServer::dispatchOutbound() {
+void botf::net::TcpServer::dispatchOutbound() {
   while (auto note = m_outbound.tryPop()) {
     const auto framed = framePayload(note->payload);
 
@@ -145,7 +144,7 @@ void TcpServer::dispatchOutbound() {
   }
 }
 
-void TcpServer::flushSendBuffers() {
+void botf::net::TcpServer::flushSendBuffers() {
   std::vector<botf::ClientId> toDrop;
 
   for (auto& [id, client] : m_clients) {
@@ -178,7 +177,7 @@ void TcpServer::flushSendBuffers() {
   }
 }
 
-void TcpServer::dropClient(botf::ClientId id) {
+void botf::net::TcpServer::dropClient(botf::ClientId id) {
   const auto it = m_clients.find(id);
   if (it == m_clients.end()) {
     return;
@@ -189,5 +188,3 @@ void TcpServer::dropClient(botf::ClientId id) {
   m_clients.erase(it);
   std::cout << "[net] client disconnected id=" << id << " (total " << m_clients.size() << ")\n";
 }
-
-}  // namespace botf::net

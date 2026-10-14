@@ -7,11 +7,9 @@
 
 #include <SFML/Network.hpp>
 
-namespace botf::app {
+botf::app::ClientApp::ClientApp() : m_net(m_inbound, m_outbound) {}
 
-ClientApp::ClientApp() : m_net(m_inbound, m_outbound) {}
-
-std::vector<SceneObject> sceneFromWorldState(const WorldState& state) {
+std::vector<botf::app::SceneObject> botf::app::sceneFromWorldState(const WorldState& state) {
   std::vector<SceneObject> scene;
   scene.reserve(static_cast<std::size_t>(state.players_size()));
   for (const auto& player : state.players()) {
@@ -24,7 +22,7 @@ std::vector<SceneObject> sceneFromWorldState(const WorldState& state) {
   return scene;
 }
 
-void ClientApp::applyInbound() {
+void botf::app::ClientApp::applyInbound() {
   while (auto note = m_inbound.tryPop()) {
     auto envelope = net::parseEnvelope(note->payload);
     if (!envelope) {
@@ -43,7 +41,7 @@ void ClientApp::applyInbound() {
   }
 }
 
-void ClientApp::maybeSendMove(const MoveInput& input, std::uint32_t tick) {
+void botf::app::ClientApp::maybeSendMove(const MoveInput& input, std::uint32_t tick) {
   if (!m_net.isConnected()) {
     return;
   }
@@ -61,7 +59,7 @@ void ClientApp::maybeSendMove(const MoveInput& input, std::uint32_t tick) {
   ++m_sequence;
 }
 
-int ClientApp::run(std::uint16_t port) {
+int botf::app::ClientApp::run(std::uint16_t port) {
   m_rendering.player().setId(0);
 
   if (!m_net.connect(sf::IpAddress::LocalHost, port, sf::seconds(1))) {
@@ -96,5 +94,3 @@ int ClientApp::run(std::uint16_t port) {
   m_net.disconnect();
   return 0;
 }
-
-}  // namespace botf::app

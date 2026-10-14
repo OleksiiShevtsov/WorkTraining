@@ -20,6 +20,27 @@
 
 > `clang-format` правит только пробелы/переносы; переименование идентификаторов — вручную / рефакторингом по этой таблице.
 
+## .cpp definitions
+
+В `.cpp` **не** оборачиваем translation unit в `namespace botf::… { }`.  
+Out-of-line definitions — с полным квалификатором. File-local helpers — в безымянном `namespace` на уровне файла.
+
+```cpp
+// headers: namespace botf::net { class TcpClient; } — как раньше
+
+namespace {
+void appendBytes(...);
+}  // namespace
+
+botf::net::TcpClient::TcpClient(ClientInboundQueue& inbound, OutboundQueue& outbound)
+    : m_inbound(inbound), m_outbound(outbound) {}
+
+// return type вне class-scope lookup — квалифицируем явно:
+botf::common::ID botf::DynamicObject::id() const { return m_id; }
+```
+
+Не использовать `using namespace botf::…` в `.cpp`. Generated `*.pb.cc` не трогаем.
+
 ## Форматирование
 
 Корень проекта: `.clang-format` (Google-based, 2 spaces, column 100).  

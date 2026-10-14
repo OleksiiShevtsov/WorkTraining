@@ -11,26 +11,25 @@
 #include <iostream>
 #include <thread>
 
-namespace botf {
 namespace {
 
 constexpr int kTickHz = 20;
 constexpr float kDt = 1.0f / static_cast<float>(kTickHz);
 constexpr auto kTickPeriod = std::chrono::milliseconds(1000 / kTickHz);
 
-std::atomic<ServerEngine*> gActiveEngine{nullptr};
+std::atomic<botf::ServerEngine*> gActiveEngine{nullptr};
 
 void onSignal(int) {
-  if (ServerEngine* engine = gActiveEngine.load()) {
+  if (botf::ServerEngine* engine = gActiveEngine.load()) {
     engine->requestStop();
   }
 }
 
-WorldState buildWorldState(const GameLogic& game, std::uint32_t tick) {
-  WorldState state;
+botf::WorldState buildWorldState(const botf::GameLogic& game, std::uint32_t tick) {
+  botf::WorldState state;
   state.set_tick(tick);
   for (const auto& obj : game.objects()) {
-    PlayerState* player = state.add_players();
+    botf::PlayerState* player = state.add_players();
     player->set_id(obj.id());
     auto* position = player->mutable_position();
     position->set_x(obj.position().x);
@@ -42,9 +41,9 @@ WorldState buildWorldState(const GameLogic& game, std::uint32_t tick) {
 
 }  // namespace
 
-ServerEngine::ServerEngine() : m_server(m_inbound, m_outbound) {}
+botf::ServerEngine::ServerEngine() : m_server(m_inbound, m_outbound) {}
 
-ServerEngine::~ServerEngine() {
+botf::ServerEngine::~ServerEngine() {
   requestStop();
   shutdown();
   if (gActiveEngine.load() == this) {
@@ -52,39 +51,39 @@ ServerEngine::~ServerEngine() {
   }
 }
 
-void ServerEngine::requestStop() {
+void botf::ServerEngine::requestStop() {
   m_running = false;
 }
 
-bool ServerEngine::startListen(std::uint16_t port) {
+bool botf::ServerEngine::startListen(std::uint16_t port) {
   return m_server.listen(port);
 }
 
-void ServerEngine::shutdown() {
+void botf::ServerEngine::shutdown() {
   m_server.stop();
 }
 
-void ServerEngine::pollNetwork() {
+void botf::ServerEngine::pollNetwork() {
   m_server.poll();
 }
 
-std::uint16_t ServerEngine::port() const {
+std::uint16_t botf::ServerEngine::port() const {
   return m_server.port();
 }
 
-std::size_t ServerEngine::clientCount() const {
+std::size_t botf::ServerEngine::clientCount() const {
   return m_server.clientCount();
 }
 
-const GameLogic& ServerEngine::game() const {
+const botf::GameLogic& botf::ServerEngine::game() const {
   return m_game;
 }
 
-std::uint32_t ServerEngine::simTick() const {
+std::uint32_t botf::ServerEngine::simTick() const {
   return m_simTick;
 }
 
-std::optional<Move> ServerEngine::lastMove(ClientId clientId) const {
+std::optional<botf::Move> botf::ServerEngine::lastMove(ClientId clientId) const {
   const auto it = m_inputStates.find(clientId);
   if (it == m_inputStates.end()) {
     return std::nullopt;
@@ -92,7 +91,7 @@ std::optional<Move> ServerEngine::lastMove(ClientId clientId) const {
   return it->second.move;
 }
 
-void ServerEngine::ensureClientBound(ClientId clientId) {
+void botf::ServerEngine::ensureClientBound(ClientId clientId) {
   if (m_game.entityForClient(clientId).has_value()) {
     return;
   }
@@ -108,7 +107,7 @@ void ServerEngine::ensureClientBound(ClientId clientId) {
   m_game.bindClient(clientId, entity);
 }
 
-void ServerEngine::applyInboundMoves(bool verbose) {
+void botf::ServerEngine::applyInboundMoves(bool verbose) {
   while (auto note = m_inbound.tryPop()) {
     Envelope envelope;
     if (!envelope.ParseFromString(note->payload)) {
@@ -144,20 +143,20 @@ void ServerEngine::applyInboundMoves(bool verbose) {
   }
 }
 
-void ServerEngine::enqueueWorldState(std::uint32_t tick, std::uint64_t sequence) {
+void botf::ServerEngine::enqueueWorldState(std::uint32_t tick, std::uint64_t sequence) {
   m_outbound.push(net::OutboundNotification{
       std::nullopt,
       net::makeWorldStateEnvelope(buildWorldState(m_game, tick), sequence),
   });
 }
 
-void ServerEngine::advanceSim(float dt) {
+void botf::ServerEngine::advanceSim(float dt) {
   m_game.tick(dt);
   ++m_simTick;
   enqueueWorldState(m_simTick, m_simTick);
 }
 
-int ServerEngine::runLoop() {
+int botf::ServerEngine::runLoop() {
   std::cout << "[server] running on port " << port() << " at " << kTickHz
             << " Hz (Ctrl+C to stop)\n";
   std::cout << "[server] Move → GameLogic.setClientInput → tick(" << kDt
@@ -193,7 +192,7 @@ int ServerEngine::runLoop() {
   return 0;
 }
 
-int ServerEngine::run(std::uint16_t port) {
+int botf::ServerEngine::run(std::uint16_t port) {
   gActiveEngine.store(this);
   std::signal(SIGINT, onSignal);
   std::signal(SIGTERM, onSignal);
@@ -208,5 +207,3 @@ int ServerEngine::run(std::uint16_t port) {
   gActiveEngine.store(nullptr);
   return code;
 }
-
-}  // namespace botf
