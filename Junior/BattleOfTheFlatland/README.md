@@ -54,7 +54,8 @@ setup.bat
 Если SFML / googletest / protobuf / spdlog уже есть — **не клонирует**.  
 Protobuf: тег `v21.12` в `%LIB%\protobuf` (битую папку без `CMakeLists.txt` переклонирует).  
 CMake на Windows/LIB собирает protobuf из исходников (`protobuf_BUILD_TESTS=OFF`), без системного `find_package`.  
-spdlog: `LIB/spdlog` → цветная консоль через `botf::log` (см. ниже).
+spdlog: `LIB/spdlog` → цветная консоль через `botf::log` (см. ниже).  
+После pull карточки 31 **перезапусти `setup.bat`** — иначе CMake не найдёт spdlog.
 
 ## Logging
 
